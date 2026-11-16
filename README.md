@@ -47,7 +47,9 @@ IntervuSetu is an AI-powered interview preparation and assessment platform desig
 - [x] **Phase 0: Environment & Architecture Initialization**  
   *Vite + React initialized, clean folder structure, CSS design tokens, React Router, and landing page.*
 - [ ] **Phase 1: Student Authentication & User Profiles**  
-  *Node.js + Express backend, MongoDB connection, JWT auth, Register/Login/Profile.*
+  * [x] **Backend & Database Foundation**: *Node.js + Express backend initialized, MongoDB Atlas connected, health endpoint `/api/health` active.*
+  * [ ] **Auth Engine & Schemas**: *User model, password hashing (bcryptjs), JWT token issuance/verification, Register & Login APIs.*
+  * [ ] **Frontend Auth UI**: *Student registration, login, and auth state management.*
 - [ ] **Phase 2: Domain Taxonomy & Role Selection**  
   *Software Engineering, Data Science, ML, Frontend, Backend role catalogs & competency tags.*
 - [ ] **Phase 3: AI Question Generation Engine**  
@@ -65,8 +67,8 @@ IntervuSetu is an AI-powered interview preparation and assessment platform desig
 
 ## 📊 Development Status
 
-> **Current Phase**: `Phase 0 — Project Initialization (Completed & Verified)`  
-> The foundational React application has been configured with Vite, React Router DOM, and Lucide React. Design tokens, base layouts, and initial landing page are verified and running locally. Core backend, database, and AI integrations will be implemented in subsequent phases.
+> **Current Phase**: `Phase 1 — Milestone 1 (Backend & MongoDB Atlas Verified)`  
+> The Express.js REST API server is configured, connected to a live MongoDB Atlas cluster, and monitored via `/api/health`. The React frontend is concurrently running with zero-leak security. Authentication endpoints and user models are the immediate next step.
 
 ---
 
@@ -76,6 +78,7 @@ IntervuSetu is an AI-powered interview preparation and assessment platform desig
 - [Node.js](https://nodejs.org/) (v18.0.0 or higher, tested on v24.x)
 - [Git](https://git-scm.com/)
 - [npm](https://www.npmjs.com/) (v10+ or v11+)
+- MongoDB Atlas cluster URI
 
 ### Installation & Startup Steps
 
@@ -85,23 +88,21 @@ IntervuSetu is an AI-powered interview preparation and assessment platform desig
    cd intervu-setu
    ```
 
-2. **Install project dependencies**:
+2. **Frontend Setup & Execution**:
    ```bash
    npm install
-   ```
-
-3. **Start the local development server**:
-   ```bash
    npm run dev
    ```
+   *Frontend starts at `http://localhost:5173/`.*
 
-4. **Open in browser**:
-   Navigate to `http://localhost:5173/` in your web browser.
-
-5. **Build for production**:
+3. **Backend Setup & Execution**:
    ```bash
-   npm run build
+   cd server
+   npm install
+   cp .env.example .env   # Configure your MONGODB_URI and JWT_SECRET
+   npm run dev
    ```
+   *Backend starts at `http://localhost:5000/` (Health check: `http://localhost:5000/api/health`).*
 
 ---
 
