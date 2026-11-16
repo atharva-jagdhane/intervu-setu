@@ -1,81 +1,37 @@
-.footer {
+.site-footer {
   margin-top: auto;
   border-top: 1px solid var(--border-subtle);
-  background: var(--bg-surface);
-  padding: 3rem 0 1.5rem;
+  background-color: var(--bg-app);
+  padding: 2.5rem 0;
 }
 
-.footer-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 2rem;
-  padding-bottom: 2.5rem;
-  border-bottom: 1px solid var(--border-subtle);
-  flex-wrap: wrap;
-}
-
-.footer-left {
-  max-width: 520px;
-}
-
-.footer-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 0.75rem;
-}
-
-.brand-title {
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: var(--text-primary);
-}
-
-.brand-dot {
-  color: var(--text-muted);
-}
-
-.brand-badge {
-  font-size: 0.75rem;
-  color: var(--accent-primary);
-  background: var(--accent-light);
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-}
-
-.footer-tagline {
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  line-height: 1.6;
-}
-
-.footer-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8125rem;
-  color: var(--text-muted);
-}
-
-.meta-item svg {
-  color: var(--accent-primary);
-}
-
-.footer-bottom {
-  padding-top: 1.5rem;
+.footer-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.8125rem;
+  font-size: 0.84375rem;
   color: var(--text-muted);
   flex-wrap: wrap;
   gap: 1rem;
+}
+
+.footer-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.footer-brand {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.footer-sep {
+  color: var(--border-medium);
+}
+
+.footer-meta {
+  color: var(--text-muted);
 }

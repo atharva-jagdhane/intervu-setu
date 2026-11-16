@@ -2,20 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import {
-  BrainCircuit,
   Sparkles,
   ArrowLeft,
   RotateCw,
   CheckCircle2,
-  Clock,
-  Layers,
   AlertCircle,
-  HelpCircle,
   Loader2,
   Tag,
-  ListChecks,
-  Sliders,
-  ChevronRight
+  ChevronDown,
+  Layers
 } from 'lucide-react';
 import './QuestionListPage.css';
 
@@ -38,14 +33,13 @@ export default function QuestionListPage() {
       setError('');
 
       try {
-        // 1. Fetch questions for this config
         const qData = await api.getQuestions(configId);
         if (isMounted) {
           setConfig(qData.config);
           setQuestions(qData.questions || []);
         }
       } catch (err) {
-        // If no questions generated yet, fetch config details to allow generating
+        // If questions not generated yet, fetch config details so user can trigger generation
         try {
           const cfgData = await api.getInterviewConfigById(configId);
           if (isMounted) {
@@ -81,7 +75,7 @@ export default function QuestionListPage() {
         if (data.config) setConfig(data.config);
       }
     } catch (err) {
-      setError(err.message || 'Gemini Question generation failed. Please try again.');
+      setError(err.message || 'Question generation failed. Please try again.');
     } finally {
       setGenerating(false);
     }
@@ -90,9 +84,9 @@ export default function QuestionListPage() {
   if (loading) {
     return (
       <div className="container loading-view">
-        <Loader2 size={40} className="icon-spin text-indigo" />
-        <h2>Loading Interview Session...</h2>
-        <p className="text-secondary">Retrieving question bank and session parameters.</p>
+        <Loader2 size={32} className="icon-spin text-emerald" />
+        <h2 className="loading-title">Loading Interview Session...</h2>
+        <p className="loading-subtitle">Retrieving configuration and questions</p>
       </div>
     );
   }
@@ -101,9 +95,9 @@ export default function QuestionListPage() {
     return (
       <div className="container error-view">
         <div className="card error-card">
-          <AlertCircle size={40} className="text-error" />
-          <h2>Unable to Load Questions</h2>
-          <p>{error}</p>
+          <AlertCircle size={36} className="text-vermilion" />
+          <h2 className="error-title">Unable to Load Interview</h2>
+          <p className="error-desc">{error}</p>
           <button onClick={() => navigate('/dashboard')} className="btn btn-secondary">
             <ArrowLeft size={16} />
             <span>Return to Dashboard</span>
@@ -115,166 +109,166 @@ export default function QuestionListPage() {
 
   return (
     <div className="question-list-page container">
-      {/* Back Link & Breadcrumb */}
-      <div className="breadcrumb-row">
+      {/* Back Link */}
+      <div className="question-nav-bar">
         <Link to="/dashboard" className="back-link">
           <ArrowLeft size={16} />
           <span>Back to Dashboard</span>
         </Link>
-        <ChevronRight size={14} className="text-muted" />
-        <span className="breadcrumb-current">AI Question Bank</span>
       </div>
 
       {/* Header Banner */}
       <div className="question-page-header">
         <div className="header-meta">
-          <div className="badge session-badge">
-            <BrainCircuit size={14} />
-            <span>Gemini AI Question Bank</span>
-          </div>
-          <h1 className="header-title">
-            Target Role: <span className="gradient-text">{config?.role}</span>
-          </h1>
-          <div className="session-spec-tags">
-            <span className="spec-tag">Domain: <strong>{config?.domain}</strong></span>
-            <span className="spec-tag">Level: <strong>{config?.experienceLevel}</strong></span>
-            <span className="spec-tag">Category: <strong>{config?.category}</strong></span>
-            <span className={`spec-tag diff-${config?.difficulty?.toLowerCase()}`}>
-              Difficulty: <strong>{config?.difficulty}</strong>
+          <span className="domain-label">{config?.domain}</span>
+          <h1 className="header-title">{config?.role}</h1>
+          <div className="session-specs">
+            <span>{config?.experienceLevel}</span>
+            <span className="dot-sep">•</span>
+            <span>{config?.category} Focus</span>
+            <span className="dot-sep">•</span>
+            <span className={`diff-badge diff-${config?.difficulty?.toLowerCase()}`}>
+              {config?.difficulty}
             </span>
           </div>
         </div>
 
-        <div className="header-actions">
-          {questions.length > 0 && (
+        {questions.length > 0 && (
+          <div className="header-actions">
             <button
               onClick={() => handleGenerate(true)}
               disabled={generating}
               className="btn btn-secondary btn-sm"
-              title="Regenerate all 10 questions using Gemini AI"
+              title="Regenerate all 10 questions"
             >
-              <RotateCw size={15} className={generating ? 'icon-spin' : ''} />
+              <RotateCw size={14} className={generating ? 'icon-spin' : ''} />
               <span>{generating ? 'Regenerating...' : 'Regenerate Questions'}</span>
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Generating State Overlay / Notice */}
+      {/* Generating Alert */}
       {generating && (
         <div className="card generating-callout">
-          <Loader2 size={24} className="icon-spin text-indigo" />
-          <div className="callout-text">
-            <h4>Google Gemini is synthesizing 10 interview questions...</h4>
-            <p>Analyzing role competencies, difficulty constraints, and evaluation rubrics.</p>
+          <Loader2 size={20} className="icon-spin text-emerald" />
+          <div>
+            <h4 className="callout-title">Synthesizing 10 Interview Questions...</h4>
+            <p className="callout-desc">Formulating role-tailored questions, expected answers, and evaluation rubrics.</p>
           </div>
         </div>
       )}
 
       {/* Error Alert */}
       {error && (
-        <div className="auth-alert error-alert" style={{ marginBottom: '2rem' }}>
+        <div className="auth-alert error-alert" style={{ marginBottom: '1.5rem' }}>
           <AlertCircle size={18} />
           <span>{error}</span>
         </div>
       )}
 
-      {/* Empty State: No questions generated yet */}
+      {/* Empty State: Prompt to generate */}
       {!generating && questions.length === 0 && (
         <div className="card empty-questions-card">
-          <Sparkles size={44} className="empty-sparkle-icon" />
-          <h2>Ready to Generate Interview Questions</h2>
-          <p>
-            Your configuration for <strong>{config?.role}</strong> ({config?.difficulty}) is locked in.
-            Click below to generate 10 context-aware questions with expected key concepts and evaluation criteria.
+          <div className="empty-badge">
+            <Sparkles size={16} />
+            <span>Ready to Generate</span>
+          </div>
+          <h2 className="empty-title">Generate Your 10-Question Bank</h2>
+          <p className="empty-desc">
+            Your interview parameters for <strong>{config?.role}</strong> are locked in.
+            Click below to generate 10 tailored questions with concepts and rubrics.
           </p>
           <button
             onClick={() => handleGenerate(false)}
             disabled={generating}
-            className="btn btn-primary btn-lg"
+            className="btn btn-primary"
           >
-            <Sparkles size={18} />
-            <span>Generate 10 Questions with Gemini</span>
+            <Sparkles size={16} />
+            <span>Generate Questions with Gemini</span>
           </button>
         </div>
       )}
 
-      {/* Questions List */}
+      {/* Question Bank List */}
       {!generating && questions.length > 0 && (
-        <div className="questions-container">
-          <div className="questions-meta-row">
-            <span className="questions-count-label">
-              Showing all <strong>{questions.length}</strong> AI-Generated Questions
-            </span>
-            <span className="notice-badge">
-              <CheckCircle2 size={13} className="text-emerald" />
-              <span>Structured Rubric Validated</span>
-            </span>
+        <div className="questions-section">
+          <div className="questions-section-header">
+            <h2 className="questions-section-title">Interview Questions ({questions.length})</h2>
+            <span className="questions-section-note">Click any question's details to view rubrics & concepts</span>
           </div>
 
           <div className="questions-list">
             {questions.map((q) => (
-              <div key={q._id || q.questionNumber} className="card question-item-card">
-                <div className="question-item-top">
-                  <div className="question-badge-group">
-                    <span className="question-number-pill">Q{q.questionNumber}</span>
-                    <span className="competency-badge">
+              <div key={q._id || q.questionNumber} className="card question-card">
+                <div className="question-header">
+                  <span className="question-idx">Q{q.questionNumber < 10 ? `0${q.questionNumber}` : q.questionNumber}</span>
+                  <div className="question-tags">
+                    <span className="competency-tag">
                       <Tag size={12} />
                       <span>{q.competency}</span>
                     </span>
+                    <span className={`diff-badge diff-${q.difficulty.toLowerCase()}`}>
+                      {q.difficulty}
+                    </span>
                   </div>
-                  <span className={`diff-pill diff-${q.difficulty.toLowerCase()}`}>
-                    {q.difficulty}
-                  </span>
                 </div>
 
                 <h3 className="question-text">{q.questionText}</h3>
 
-                {/* Expected Key Concepts */}
-                {q.expectedKeyConcepts && q.expectedKeyConcepts.length > 0 && (
-                  <div className="concepts-section">
-                    <span className="section-mini-heading">Expected Key Concepts:</span>
-                    <div className="concepts-pills">
-                      {q.expectedKeyConcepts.map((concept, idx) => (
-                        <span key={idx} className="concept-pill">
-                          {concept}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {/* Collapsible Rubric & Concepts */}
+                {((q.expectedKeyConcepts && q.expectedKeyConcepts.length > 0) ||
+                  (q.evaluationCriteria && q.evaluationCriteria.length > 0)) && (
+                  <details className="rubric-accordion">
+                    <summary className="rubric-summary">
+                      <span>View Expected Concepts & Rubric</span>
+                      <ChevronDown size={14} className="accordion-chevron" />
+                    </summary>
 
-                {/* Evaluation Criteria */}
-                {q.evaluationCriteria && q.evaluationCriteria.length > 0 && (
-                  <div className="criteria-section">
-                    <span className="section-mini-heading">Evaluation Rubric:</span>
-                    <ul className="criteria-list">
-                      {q.evaluationCriteria.map((criterion, idx) => (
-                        <li key={idx}>
-                          <CheckCircle2 size={14} className="text-emerald" />
-                          <span>{criterion}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                    <div className="rubric-content">
+                      {q.expectedKeyConcepts && q.expectedKeyConcepts.length > 0 && (
+                        <div className="rubric-block">
+                          <h4 className="rubric-subheading">Expected Key Concepts</h4>
+                          <div className="concepts-pill-wrap">
+                            {q.expectedKeyConcepts.map((concept, idx) => (
+                              <span key={idx} className="concept-chip">
+                                {concept}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {q.evaluationCriteria && q.evaluationCriteria.length > 0 && (
+                        <div className="rubric-block">
+                          <h4 className="rubric-subheading">Evaluation Rubric</h4>
+                          <ul className="criteria-list">
+                            {q.evaluationCriteria.map((criterion, idx) => (
+                              <li key={idx} className="criteria-item">
+                                <CheckCircle2 size={14} className="text-emerald" />
+                                <span>{criterion}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </details>
                 )}
               </div>
             ))}
           </div>
 
-          {/* Next Phase Teaser Banner */}
-          <div className="card voice-interview-teaser">
-            <div className="teaser-content">
-              <span className="badge">
-                <Sparkles size={13} />
-                <span>Upcoming Phase 4</span>
-              </span>
-              <h3>Real-Time Voice Mock Interview with Vapi AI</h3>
-              <p>
-                In the next phase, our real-time voice conversational agent will ask you these questions dynamically, listen to your spoken answers, and track your voice turn-taking.
+          {/* Clean Next Phase Note */}
+          <div className="card upcoming-phase-card">
+            <div>
+              <span className="phase-badge">Next: Phase 4</span>
+              <h3 className="phase-title">Real-Time Voice Mock Interview</h3>
+              <p className="phase-desc">
+                In Phase 4, our voice agent will dynamically conduct this interview, evaluate spoken answers, and deliver real-time feedback.
               </p>
             </div>
-            <Link to="/dashboard" className="btn btn-secondary">
+            <Link to="/dashboard" className="btn btn-secondary btn-sm">
               <span>Return to Dashboard</span>
             </Link>
           </div>

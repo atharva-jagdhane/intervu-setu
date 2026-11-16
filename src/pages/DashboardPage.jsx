@@ -2,26 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
-import {
-  Sparkles,
-  User,
-  GraduationCap,
-  Briefcase,
-  Calendar,
-  LogOut,
-  Sliders,
-  Layers,
-  ArrowRight,
-  Clock,
-  CheckCircle2,
-  AlertCircle
-} from 'lucide-react';
+import { Plus, ArrowRight, Clock, Sparkles } from 'lucide-react';
 import './DashboardPage.css';
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [configs, setConfigs] = useState([]);
-  const [loadingConfigs, setLoadingConfigs] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -33,9 +20,9 @@ export default function DashboardPage() {
           setConfigs(data.configs || []);
         }
       } catch (err) {
-        console.error('Error loading previous configurations:', err.message);
+        console.error('Error fetching interview configurations:', err.message);
       } finally {
-        if (isMounted) setLoadingConfigs(false);
+        if (isMounted) setLoading(false);
       }
     };
 
@@ -47,151 +34,85 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="dashboard-container container">
-      {/* Welcome Banner */}
-      <div className="dashboard-hero">
-        <div className="hero-text">
-          <div className="badge welcome-badge">
-            <span className="badge-dot"></span>
-            <span>Student Dashboard</span>
-          </div>
-          <h1 className="dashboard-title">
-            Welcome back, <span className="gradient-text">{user?.name}</span>!
-          </h1>
-          <p className="dashboard-subtitle">
-            Your personalized interview preparation portal. Target Track: <strong>{user?.targetRole}</strong>.
+    <div className="dashboard-page container">
+      {/* Personalized Greeting & Single Clear Action */}
+      <div className="dashboard-top-bar">
+        <div className="dashboard-welcome">
+          <h1 className="welcome-name">Hello, {user?.name?.split(' ')[0] || 'Student'}</h1>
+          <p className="welcome-sub">
+            {user?.targetRole ? `Targeting ${user.targetRole}` : 'Prepare for your next technical interview'}
           </p>
         </div>
 
-        <div className="hero-actions">
-          <Link to="/interview/configure" className="btn btn-primary btn-sm">
-            <Sliders size={16} />
-            <span>Configure New Interview</span>
-            <ArrowRight size={15} />
-          </Link>
-          <button onClick={logout} className="btn btn-secondary btn-sm logout-btn">
-            <LogOut size={16} />
-            <span>Sign Out</span>
-          </button>
-        </div>
+        <Link to="/interview/configure" className="btn btn-primary">
+          <Plus size={16} />
+          <span>Start New Interview</span>
+        </Link>
       </div>
 
-      {/* Grid: Profile Card & Saved Configurations */}
-      <div className="dashboard-grid">
-        {/* Student Profile Card */}
-        <div className="card profile-card">
-          <div className="card-header">
-            <h2 className="card-title">Student Profile</h2>
-            <span className="status-pill active-pill">Active Session</span>
-          </div>
-
-          <div className="profile-details">
-            <div className="detail-item">
-              <User size={18} className="detail-icon" />
-              <div>
-                <span className="detail-label">Full Name</span>
-                <span className="detail-value">{user?.name}</span>
-              </div>
-            </div>
-
-            <div className="detail-item">
-              <GraduationCap size={18} className="detail-icon" />
-              <div>
-                <span className="detail-label">Education / Degree</span>
-                <span className="detail-value">{user?.education || 'B.Tech Data Science'}</span>
-              </div>
-            </div>
-
-            <div className="detail-item">
-              <Briefcase size={18} className="detail-icon" />
-              <div>
-                <span className="detail-label">Target Job Role</span>
-                <span className="detail-value">{user?.targetRole || 'Software Engineer'}</span>
-              </div>
-            </div>
-
-            <div className="detail-item">
-              <Calendar size={18} className="detail-icon" />
-              <div>
-                <span className="detail-label">Account Created</span>
-                <span className="detail-value">
-                  {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Today'}
-                </span>
-              </div>
-            </div>
-          </div>
+      {/* Recent Sessions Overview */}
+      <section className="sessions-section">
+        <div className="sessions-header">
+          <h2 className="sessions-heading">Recent Interview Sessions</h2>
+          {configs.length > 0 && (
+            <span className="sessions-count">{configs.length} {configs.length === 1 ? 'session' : 'sessions'}</span>
+          )}
         </div>
 
-        {/* Quick Start / Next Action Banner */}
-        <div className="card quick-action-card">
-          <div className="card-header">
-            <h2 className="card-title">Interview Configuration (Phase 2)</h2>
-            <span className="badge">
-              <Sparkles size={13} />
-              <span>Ready</span>
-            </span>
+        {loading ? (
+          <div className="loading-card">
+            <p>Loading your interview sessions...</p>
           </div>
-          <p className="card-description">
-            Customize your mock interview domain, job role, experience level, interview category, and evaluation difficulty.
-          </p>
-
-          <Link to="/interview/configure" className="btn btn-primary btn-block">
-            <Sliders size={18} />
-            <span>Launch Configuration Studio</span>
-            <ArrowRight size={18} />
-          </Link>
-        </div>
-      </div>
-
-      {/* Previous Configurations Section */}
-      <section className="saved-configs-section">
-        <div className="section-title-row">
-          <h2 className="section-heading">My Configured Interviews</h2>
-          <span className="configs-count-badge">{configs.length} Saved</span>
-        </div>
-
-        {loadingConfigs ? (
-          <p className="loading-text">Loading your saved configurations...</p>
         ) : configs.length === 0 ? (
-          <div className="card empty-configs-card">
-            <Sliders size={32} className="empty-icon" />
-            <h3>No interview configurations yet</h3>
-            <p>Select your domain, role, and difficulty level to prepare your first AI interview.</p>
-            <Link to="/interview/configure" className="btn btn-secondary btn-sm" style={{ marginTop: '1rem' }}>
-              <span>Configure First Interview</span>
-              <ArrowRight size={15} />
+          /* Clean Empty State */
+          <div className="card empty-dashboard-card">
+            <h3 className="empty-title">No interviews configured yet</h3>
+            <p className="empty-desc">
+              Choose your career domain, job role, and difficulty level to generate a custom 10-question interview bank.
+            </p>
+            <Link to="/interview/configure" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>
+              <span>Configure Your First Interview</span>
+              <ArrowRight size={16} />
             </Link>
           </div>
         ) : (
-          <div className="configs-cards-grid">
+          /* Compact, Airy Session Cards */
+          <div className="sessions-list">
             {configs.map((cfg) => (
-              <div key={cfg._id} className="card config-history-card">
-                <div className="config-history-header">
-                  <span className="config-domain-badge">{cfg.domain}</span>
-                  <span className={`config-diff-badge diff-${cfg.difficulty.toLowerCase()}`}>
-                    {cfg.difficulty}
-                  </span>
+              <div key={cfg._id} className="card session-card">
+                <div className="session-card-main">
+                  <div className="session-tags">
+                    <span className="session-domain">{cfg.domain}</span>
+                    <span className={`diff-badge diff-${cfg.difficulty.toLowerCase()}`}>
+                      {cfg.difficulty}
+                    </span>
+                  </div>
+                  <h3 className="session-role">{cfg.role}</h3>
+                  <div className="session-details">
+                    <span>{cfg.experienceLevel}</span>
+                    <span className="dot-sep">•</span>
+                    <span>{cfg.category} Category</span>
+                    <span className="dot-sep">•</span>
+                    <span className="session-date">
+                      <Clock size={13} />
+                      {new Date(cfg.createdAt).toLocaleDateString(undefined, {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </span>
+                  </div>
                 </div>
-                <h3 className="config-role-title">{cfg.role}</h3>
-                <div className="config-history-meta">
-                  <span>Level: <strong>{cfg.experienceLevel}</strong></span>
-                  <span>Category: <strong>{cfg.category}</strong></span>
-                  <span className="config-date">
-                    <Clock size={13} />
-                    {new Date(cfg.createdAt).toLocaleDateString()}
-                  </span>
+
+                <div className="session-card-action">
+                  <Link
+                    to={`/interview/${cfg._id}/questions`}
+                    className="btn btn-secondary btn-sm"
+                  >
+                    <span>View Question Bank</span>
+                    <ArrowRight size={14} />
+                  </Link>
                 </div>
-                <Link
-                  to={`/interview/${cfg._id}/questions`}
-                  className="btn btn-secondary btn-sm"
-                  style={{ marginTop: '0.65rem', justifyContent: 'space-between' }}
-                >
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Sparkles size={14} style={{ color: 'var(--accent-primary)' }} />
-                    <span>View / Generate Questions</span>
-                  </span>
-                  <ArrowRight size={14} />
-                </Link>
               </div>
             ))}
           </div>

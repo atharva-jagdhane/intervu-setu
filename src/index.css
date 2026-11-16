@@ -1,57 +1,57 @@
 /* ==========================================================================
    IntervuSetu — Design System & Global Styles
-   Premium SaaS Design Tokens: Deep Slate, Indigo/Violet Accents, Clean Typography
+   Minimal Editorial Identity: Warm Ivory, Emerald Green, Vermilion Accents
    ========================================================================== */
 
 :root {
-  /* Color Palette */
-  --bg-app: #0b0f19;
-  --bg-surface: #111827;
-  --bg-card: #151d30;
-  --bg-card-hover: #1c2640;
-  --bg-muted: #1e293b;
+  /* Brand Palette */
+  --bg-app: #F9EBD7;               /* Warm Ivory background */
+  --bg-surface: #FFFFFF;           /* Crisp, clean white surface */
+  --bg-surface-warm: #FFFDF9;      /* Off-white / light ivory card surface */
+  --bg-muted: #F2E3CD;             /* Muted warm ivory tint */
+  --bg-hover: #EFE0C9;
 
-  /* Accent Colors (Restrained Blue/Violet Palette) */
-  --accent-primary: #6366f1;       /* Indigo */
-  --accent-secondary: #8b5cf6;     /* Violet */
-  --accent-hover: #4f46e5;
-  --accent-light: rgba(99, 102, 241, 0.12);
-  --accent-border: rgba(99, 102, 241, 0.28);
-  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-  --accent-glow: 0 0 24px rgba(99, 102, 241, 0.25);
+  /* Primary Brand Colors */
+  --color-primary: #046A38;        /* Emerald Green (Actions & Primary Buttons) */
+  --color-primary-hover: #03522b;
+  --color-primary-light: rgba(4, 106, 56, 0.08);
+  --color-primary-border: rgba(4, 106, 56, 0.22);
 
-  /* Functional Status Colors */
-  --success: #10b981;
-  --success-bg: rgba(16, 185, 129, 0.1);
-  --warning: #f59e0b;
-  --warning-bg: rgba(245, 158, 11, 0.1);
-  --error: #ef4444;
-  --error-bg: rgba(239, 68, 68, 0.1);
+  /* Accent Highlight */
+  --color-accent: #E34222;         /* Vermilion (Highlights & Selection) */
+  --color-accent-hover: #c93517;
+  --color-accent-light: rgba(227, 66, 34, 0.08);
+  --color-accent-border: rgba(227, 66, 34, 0.25);
 
   /* Typography Colors */
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --text-inverse: #0b0f19;
+  --text-main: #1C1917;            /* Deep charcoal / near-black */
+  --text-secondary: #57534E;       /* Muted warm grey */
+  --text-muted: #857F77;           /* Light warm grey */
+  --text-inverse: #FFFFFF;
 
   /* Borders & Dividers */
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
+  --border-subtle: #E7D8C4;        /* Thin, subtle warm neutral border */
+  --border-medium: #DCCBB5;
 
-  /* Radii */
+  /* Functional Status */
+  --success: #046A38;
+  --error: #E34222;
+  --error-bg: rgba(227, 66, 34, 0.08);
+  --error-border: rgba(227, 66, 34, 0.25);
+
+  /* Geometry & Elevation */
   --radius-sm: 6px;
   --radius-md: 10px;
-  --radius-lg: 16px;
+  --radius-lg: 14px;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
-  --shadow-md: 0 4px 12px 0 rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 12px 32px -4px rgba(0, 0, 0, 0.5);
+  --shadow-subtle: 0 1px 3px rgba(44, 34, 24, 0.04), 0 1px 2px rgba(44, 34, 24, 0.03);
+  --shadow-card: 0 4px 16px -2px rgba(44, 34, 24, 0.06);
 
-  /* Layout */
-  --max-width: 1200px;
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Layout & Typography Scale */
+  --max-width: 1080px;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Manrope', 'Inter', -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
@@ -65,7 +65,7 @@
 html {
   font-family: var(--font-sans);
   background-color: var(--bg-app);
-  color: var(--text-primary);
+  color: var(--text-main);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -75,6 +75,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--bg-app);
 }
 
 #root {
@@ -83,20 +84,22 @@ body {
   flex-direction: column;
 }
 
-/* Links & Typography */
-a {
-  color: inherit;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
+/* Typography Hierarchy */
 h1, h2, h3, h4, h5, h6 {
-  color: var(--text-primary);
+  font-family: var(--font-heading);
+  color: var(--text-main);
   font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1.25;
 }
 
-/* Layout Utilities */
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+/* Layout Container */
 .container {
   width: 100%;
   max-width: var(--max-width);
@@ -106,29 +109,7 @@ h1, h2, h3, h4, h5, h6 {
   padding-right: 1.5rem;
 }
 
-/* Badge Component */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.85rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  border-radius: var(--radius-full);
-  background: var(--accent-light);
-  border: 1px solid var(--accent-border);
-  color: #c7d2fe;
-}
-
-.badge-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: #38bdf8;
-  box-shadow: 0 0 8px #38bdf8;
-}
-
-/* Buttons */
+/* Clean Button System */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -136,53 +117,141 @@ h1, h2, h3, h4, h5, h6 {
   gap: 0.5rem;
   font-size: 0.9375rem;
   font-weight: 600;
-  padding: 0.75rem 1.35rem;
+  padding: 0.7rem 1.35rem;
   border-radius: var(--radius-md);
   cursor: pointer;
   border: 1px solid transparent;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   font-family: inherit;
+  line-height: 1.2;
 }
 
 .btn-primary {
-  background: var(--accent-gradient);
-  color: #ffffff;
-  box-shadow: var(--shadow-md), var(--accent-glow);
+  background-color: var(--color-primary);
+  color: #FFFFFF;
 }
 
 .btn-primary:hover {
+  background-color: var(--color-primary-hover);
   transform: translateY(-1px);
-  filter: brightness(1.1);
 }
 
 .btn-secondary {
-  background: var(--bg-card);
-  color: var(--text-primary);
+  background-color: var(--bg-surface);
+  color: var(--text-main);
   border: 1px solid var(--border-subtle);
 }
 
 .btn-secondary:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--border-strong);
+  background-color: var(--bg-muted);
+  border-color: var(--border-medium);
 }
 
-/* Card Component */
+.btn-accent {
+  background-color: var(--color-accent);
+  color: #FFFFFF;
+}
+
+.btn-accent:hover {
+  background-color: var(--color-accent-hover);
+}
+
+.btn-sm {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.8125rem;
+}
+
+.btn-lg {
+  padding: 0.85rem 1.65rem;
+  font-size: 1rem;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Clean Card Component */
 .card {
-  background: var(--bg-card);
+  background-color: var(--bg-surface-warm);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 1.75rem;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: var(--shadow-subtle);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.card:hover {
-  border-color: var(--accent-border);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+/* Badges & Tags */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary-border);
 }
 
-/* Accessibility */
+.badge-vermilion {
+  background-color: var(--color-accent-light);
+  color: var(--color-accent);
+  border-color: var(--color-accent-border);
+}
+
+/* Form Controls */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.form-label {
+  font-size: 0.84375rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.form-input, .form-select {
+  width: 100%;
+  padding: 0.75rem 0.95rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-input:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Alerts */
+.alert-error {
+  background-color: var(--error-bg);
+  border: 1px solid var(--error-border);
+  color: var(--error);
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* Accessibility Focus */
 :focus-visible {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 3px;
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }

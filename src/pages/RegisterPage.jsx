@@ -1,19 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import {
-  User,
-  Mail,
-  Lock,
-  GraduationCap,
-  Briefcase,
-  Eye,
-  EyeOff,
-  Sparkles,
-  ArrowRight,
-  AlertCircle,
-  CheckCircle2
-} from 'lucide-react';
+import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import './AuthPages.css';
 
 export default function RegisterPage() {
@@ -39,24 +27,26 @@ export default function RegisterPage() {
     'Machine Learning Engineer',
     'Full Stack Developer',
     'Frontend Developer',
-    'Backend Developer'
+    'Backend Developer',
+    'Data Engineer',
+    'DevOps Engineer'
   ];
 
   const validate = () => {
     const errors = {};
-    if (!formData.name.trim()) errors.name = 'Please enter your full name';
+    if (!formData.name.trim()) errors.name = 'Please enter your name';
     if (!formData.email.trim()) {
-      errors.email = 'Please enter your email address';
+      errors.email = 'Please enter your email';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      errors.email = 'Please provide a valid email format';
+      errors.email = 'Please enter a valid email';
     }
 
     if (!formData.password) {
       errors.password = 'Please create a password';
     } else if (formData.password.length < 8) {
-      errors.password = 'Password must be at least 8 characters long';
+      errors.password = 'Password must be at least 8 characters';
     } else if (!/[a-zA-Z]/.test(formData.password) || !/\d/.test(formData.password)) {
-      errors.password = 'Password must contain at least one letter and one number';
+      errors.password = 'Password must include at least one letter and one number';
     }
 
     setClientErrors(errors);
@@ -83,117 +73,91 @@ export default function RegisterPage() {
       await register(formData);
       navigate('/dashboard', { replace: true });
     } catch (err) {
-      setServerError(err.message || 'Registration failed. Please check your details.');
+      setServerError(err.message || 'Registration failed. Please check your information.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="auth-wrapper">
-      <div className="auth-card">
-        {/* Header */}
+    <div className="auth-container">
+      <div className="auth-box">
         <div className="auth-header">
-          <div className="auth-logo-badge">
-            <Sparkles size={20} />
-          </div>
-          <h1 className="auth-title">Create Student Account</h1>
-          <p className="auth-subtitle">
-            Begin your AI-powered interview preparation journey with IntervuSetu.
+          <h1 className="auth-heading">Create Account</h1>
+          <p className="auth-subheading">
+            Sign up to start configuring and practicing AI mock interviews.
           </p>
         </div>
 
-        {/* Server Error Alert */}
         {serverError && (
-          <div className="auth-alert error-alert">
-            <AlertCircle size={18} />
+          <div className="alert-error" style={{ marginBottom: '1.25rem' }}>
+            <AlertCircle size={16} />
             <span>{serverError}</span>
           </div>
         )}
 
-        {/* Registration Form */}
         <form onSubmit={handleSubmit} className="auth-form" noValidate>
-          {/* Full Name */}
           <div className="form-group">
             <label htmlFor="name" className="form-label">Full Name</label>
-            <div className="input-group">
-              <User size={18} className="input-icon" />
-              <input
-                id="name"
-                name="name"
-                type="text"
-                placeholder="Atharva Jagdhane"
-                value={formData.name}
-                onChange={handleChange}
-                className={`form-input ${clientErrors.name ? 'input-error' : ''}`}
-                autoComplete="name"
-              />
-            </div>
-            {clientErrors.name && <span className="field-error">{clientErrors.name}</span>}
+            <input
+              id="name"
+              name="name"
+              type="text"
+              placeholder="e.g. Atharva Jagdhane"
+              value={formData.name}
+              onChange={handleChange}
+              className={`form-input ${clientErrors.name ? 'input-error' : ''}`}
+            />
+            {clientErrors.name && <span className="error-text">{clientErrors.name}</span>}
           </div>
 
-          {/* Email Address */}
           <div className="form-group">
             <label htmlFor="email" className="form-label">Student Email</label>
-            <div className="input-group">
-              <Mail size={18} className="input-icon" />
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="name@college.edu"
+              value={formData.email}
+              onChange={handleChange}
+              className={`form-input ${clientErrors.email ? 'input-error' : ''}`}
+            />
+            {clientErrors.email && <span className="error-text">{clientErrors.email}</span>}
+          </div>
+
+          <div className="form-row-2">
+            <div className="form-group">
+              <label htmlFor="education" className="form-label">Degree / Stream</label>
               <input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="name@college.edu"
-                value={formData.email}
+                id="education"
+                name="education"
+                type="text"
+                placeholder="B.Tech Data Science"
+                value={formData.education}
                 onChange={handleChange}
-                className={`form-input ${clientErrors.email ? 'input-error' : ''}`}
-                autoComplete="email"
+                className="form-input"
               />
             </div>
-            {clientErrors.email && <span className="field-error">{clientErrors.email}</span>}
-          </div>
 
-          {/* Education / Stream */}
-          <div className="form-row">
-            <div className="form-group flex-1">
-              <label htmlFor="education" className="form-label">Degree / Branch</label>
-              <div className="input-group">
-                <GraduationCap size={18} className="input-icon" />
-                <input
-                  id="education"
-                  name="education"
-                  type="text"
-                  placeholder="B.Tech Data Science"
-                  value={formData.education}
-                  onChange={handleChange}
-                  className="form-input"
-                />
-              </div>
-            </div>
-
-            {/* Target Job Role */}
-            <div className="form-group flex-1">
+            <div className="form-group">
               <label htmlFor="targetRole" className="form-label">Target Role</label>
-              <div className="input-group">
-                <Briefcase size={18} className="input-icon" />
-                <select
-                  id="targetRole"
-                  name="targetRole"
-                  value={formData.targetRole}
-                  onChange={handleChange}
-                  className="form-input form-select"
-                >
-                  {targetRoles.map((role) => (
-                    <option key={role} value={role}>{role}</option>
-                  ))}
-                </select>
-              </div>
+              <select
+                id="targetRole"
+                name="targetRole"
+                value={formData.targetRole}
+                onChange={handleChange}
+                className="form-select"
+              >
+                {targetRoles.map((role) => (
+                  <option key={role} value={role}>{role}</option>
+                ))}
+              </select>
             </div>
           </div>
 
-          {/* Password */}
           <div className="form-group">
-            <label htmlFor="password" className="form-label">Create Password</label>
-            <div className="input-group">
-              <Lock size={18} className="input-icon" />
+            <label htmlFor="password" className="form-label">Password</label>
+            <div className="password-input-wrapper">
               <input
                 id="password"
                 name="password"
@@ -202,58 +166,32 @@ export default function RegisterPage() {
                 value={formData.password}
                 onChange={handleChange}
                 className={`form-input ${clientErrors.password ? 'input-error' : ''}`}
-                autoComplete="new-password"
               />
               <button
                 type="button"
-                className="input-action-btn"
+                className="password-toggle-btn"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
-            {clientErrors.password && <span className="field-error">{clientErrors.password}</span>}
-
-            {/* Password Requirement Hint */}
-            <div className="password-rules">
-              <span className={formData.password.length >= 8 ? 'rule-met' : 'rule-pending'}>
-                • Minimum 8 chars
-              </span>
-              <span className={/[a-zA-Z]/.test(formData.password) ? 'rule-met' : 'rule-pending'}>
-                • 1 letter
-              </span>
-              <span className={/\d/.test(formData.password) ? 'rule-met' : 'rule-pending'}>
-                • 1 number
-              </span>
-            </div>
+            {clientErrors.password && <span className="error-text">{clientErrors.password}</span>}
           </div>
 
-          {/* Submit CTA */}
           <button
             type="submit"
             className="btn btn-primary btn-block"
             disabled={isSubmitting}
+            style={{ marginTop: '0.5rem' }}
           >
-            {isSubmitting ? (
-              <span>Creating your profile...</span>
-            ) : (
-              <>
-                <span>Complete Registration</span>
-                <ArrowRight size={18} />
-              </>
-            )}
+            {isSubmitting ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
 
-        {/* Footer */}
-        <div className="auth-footer">
-          <p>
-            Already registered?{' '}
-            <Link to="/login" className="auth-link">
-              Sign in to your dashboard
-            </Link>
-          </p>
+        <div className="auth-footer-note">
+          <span>Already have an account? </span>
+          <Link to="/login" className="auth-switch-link">Sign In</Link>
         </div>
       </div>
     </div>

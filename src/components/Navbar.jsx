@@ -1,70 +1,77 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Sparkles, GitBranch, LogIn, LogOut, LayoutDashboard, User } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { LogOut } from 'lucide-react';
 import './Navbar.css';
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
   };
 
+  const isActive = (path) => location.pathname === path;
+
   return (
-    <header className="navbar">
-      <div className="container navbar-content">
-        <Link to="/" className="navbar-brand">
-          <div className="navbar-logo-icon">
-            <Sparkles size={20} className="icon-pulse" />
-          </div>
-          <div className="navbar-brand-text">
-            <span className="brand-name">IntervuSetu</span>
-            <span className="brand-sub">Platform</span>
-          </div>
+    <header className="site-header">
+      <div className="container header-container">
+        {/* Brand */}
+        <Link to="/" className="brand-logo">
+          <span className="brand-dot"></span>
+          <span className="brand-title">IntervuSetu</span>
         </Link>
 
-        <nav className="navbar-links">
-          <Link to="/" className="nav-link">Home</Link>
-          {isAuthenticated && (
-            <Link to="/dashboard" className="nav-link">Dashboard</Link>
+        {/* Navigation */}
+        <nav className="header-nav">
+          {isAuthenticated ? (
+            <>
+              <Link
+                to="/dashboard"
+                className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}
+              >
+                Dashboard
+              </Link>
+              <Link
+                to="/interview/configure"
+                className={`nav-link ${isActive('/interview/configure') ? 'active' : ''}`}
+              >
+                Configure Interview
+              </Link>
+            </>
+          ) : (
+            <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>
+              Overview
+            </Link>
           )}
-          <a href="/#features" className="nav-link">Core Modules</a>
-          <a href="/#tech-stack" className="nav-link">Tech Stack</a>
         </nav>
 
-        <div className="navbar-actions">
-          <a
-            href="https://github.com/atharva-jagdhane/intervu-setu"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-secondary btn-sm"
-          >
-            <GitBranch size={16} />
-            <span>Repo</span>
-          </a>
-
+        {/* Actions */}
+        <div className="header-actions">
           {isAuthenticated ? (
-            <div className="user-nav-group">
-              <Link to="/dashboard" className="user-profile-pill">
-                <User size={15} />
-                <span>{user?.name?.split(' ')[0] || 'Student'}</span>
-              </Link>
-              <button onClick={handleLogout} className="btn btn-secondary btn-sm" title="Sign Out">
+            <div className="auth-user-row">
+              <span className="user-greeting">
+                {user?.name?.split(' ')[0] || 'Student'}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="btn-text-signout"
+                title="Sign Out"
+              >
                 <LogOut size={15} />
-                <span>Logout</span>
+                <span>Sign Out</span>
               </button>
             </div>
           ) : (
-            <div className="auth-btn-group">
+            <div className="public-actions">
               <Link to="/login" className="btn btn-secondary btn-sm">
-                <LogIn size={15} />
-                <span>Sign In</span>
+                Sign In
               </Link>
               <Link to="/register" className="btn btn-primary btn-sm">
-                <span>Register</span>
+                Start Preparing
               </Link>
             </div>
           )}

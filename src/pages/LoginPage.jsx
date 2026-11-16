@@ -1,15 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  Sparkles,
-  ArrowRight,
-  AlertCircle
-} from 'lucide-react';
+import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import './AuthPages.css';
 
 export default function LoginPage() {
@@ -17,7 +9,6 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Redirect to the originally requested page if redirected from a ProtectedRoute
   const destination = location.state?.from?.pathname || '/dashboard';
 
   const [formData, setFormData] = useState({
@@ -33,9 +24,9 @@ export default function LoginPage() {
   const validate = () => {
     const errors = {};
     if (!formData.email.trim()) {
-      errors.email = 'Please enter your student email';
+      errors.email = 'Please enter your email';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      errors.email = 'Please provide a valid email format';
+      errors.email = 'Please provide a valid email';
     }
 
     if (!formData.password) {
@@ -73,102 +64,74 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="auth-wrapper">
-      <div className="auth-card">
-        {/* Header */}
+    <div className="auth-container">
+      <div className="auth-box">
         <div className="auth-header">
-          <div className="auth-logo-badge">
-            <Sparkles size={20} />
-          </div>
-          <h1 className="auth-title">Welcome Back</h1>
-          <p className="auth-subtitle">
-            Sign in to continue your mock interviews and performance tracking.
+          <h1 className="auth-heading">Sign In</h1>
+          <p className="auth-subheading">
+            Access your interview configurations and saved question banks.
           </p>
         </div>
 
-        {/* Server Error Alert */}
         {serverError && (
-          <div className="auth-alert error-alert">
-            <AlertCircle size={18} />
+          <div className="alert-error" style={{ marginBottom: '1.25rem' }}>
+            <AlertCircle size={16} />
             <span>{serverError}</span>
           </div>
         )}
 
-        {/* Login Form */}
         <form onSubmit={handleSubmit} className="auth-form" noValidate>
-          {/* Email Address */}
           <div className="form-group">
-            <label htmlFor="email" className="form-label">Student Email</label>
-            <div className="input-group">
-              <Mail size={18} className="input-icon" />
-              <input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="name@college.edu"
-                value={formData.email}
-                onChange={handleChange}
-                className={`form-input ${clientErrors.email ? 'input-error' : ''}`}
-                autoComplete="email"
-              />
-            </div>
-            {clientErrors.email && <span className="field-error">{clientErrors.email}</span>}
+            <label htmlFor="email" className="form-label">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="name@college.edu"
+              value={formData.email}
+              onChange={handleChange}
+              className={`form-input ${clientErrors.email ? 'input-error' : ''}`}
+            />
+            {clientErrors.email && <span className="error-text">{clientErrors.email}</span>}
           </div>
 
-          {/* Password */}
           <div className="form-group">
-            <div className="form-label-row">
-              <label htmlFor="password" className="form-label">Password</label>
-            </div>
-            <div className="input-group">
-              <Lock size={18} className="input-icon" />
+            <label htmlFor="password" className="form-label">Password</label>
+            <div className="password-input-wrapper">
               <input
                 id="password"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Enter your account password"
+                placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
                 className={`form-input ${clientErrors.password ? 'input-error' : ''}`}
-                autoComplete="current-password"
               />
               <button
                 type="button"
-                className="input-action-btn"
+                className="password-toggle-btn"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
-            {clientErrors.password && <span className="field-error">{clientErrors.password}</span>}
+            {clientErrors.password && <span className="error-text">{clientErrors.password}</span>}
           </div>
 
-          {/* Submit CTA */}
           <button
             type="submit"
             className="btn btn-primary btn-block"
             disabled={isSubmitting}
+            style={{ marginTop: '0.5rem' }}
           >
-            {isSubmitting ? (
-              <span>Authenticating...</span>
-            ) : (
-              <>
-                <span>Sign In to Dashboard</span>
-                <ArrowRight size={18} />
-              </>
-            )}
+            {isSubmitting ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
-        {/* Footer */}
-        <div className="auth-footer">
-          <p>
-            New to IntervuSetu?{' '}
-            <Link to="/register" className="auth-link">
-              Create a free student account
-            </Link>
-          </p>
+        <div className="auth-footer-note">
+          <span>Don't have an account? </span>
+          <Link to="/register" className="auth-switch-link">Start Preparing</Link>
         </div>
       </div>
     </div>
