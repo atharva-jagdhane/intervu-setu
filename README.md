@@ -54,8 +54,11 @@ IntervuSetu is an AI-powered interview preparation and assessment platform desig
   * [x] **Domain Catalog**: *5 primary domains (Software Engineering, Data Science & AI, Data Engineering, Cloud & DevOps, HR & Behavioral).*
   * [x] **Configuration Engine**: *Mongoose relationship schema (`InterviewConfig`), ownership validation, role-domain cascading state, and multi-tier experience/category/difficulty selectors.*
   * [x] **Configuration Studio UI**: *Responsive configuration studio page, interactive summary card, and dashboard configuration history.*
-- [ ] **Phase 3: AI Question Generation Engine**  
-  *Google Gemini API backend integration with structured JSON schema outputs.*
+- [x] **Phase 3: AI Question Generation Engine**  
+  * [x] **Google GenAI Backend Service**: *Official `@google/genai` integration, multi-model fallback (`gemini-3.5-flash`), zero-leak key protection.*
+  * [x] **Structured Output & Schema Validation**: *10 contextual interview questions with competencies, expected key concepts, and evaluation rubrics.*
+  * [x] **Mongoose Persistence & Isolation**: *`InterviewQuestion` schema with compound indexing and strict cross-student access guards.*
+  * [x] **Question Bank UI**: *Interactive question-list view with loading indicators, empty states, and regeneration actions.*
 - [ ] **Phase 4: Real-Time Voice Interview Engine**  
   *Vapi Web SDK integration, audio streaming, turn indicators, and live transcript visualizer.*
 - [ ] **Phase 5: AI Answer Evaluation & Multi-Metric Scoring**  
@@ -69,8 +72,8 @@ IntervuSetu is an AI-powered interview preparation and assessment platform desig
 
 ## 📊 Development Status
 
-> **Current Phase**: `Phase 2 — Interview Configuration System (Completed & Verified)`  
-> Students can select career domains, targeted job roles, experience levels, interview categories, and difficulties. Configurations are validated, stored in MongoDB Atlas with student ownership isolation, and listed in the authenticated student dashboard. Ready for Phase 3 (Gemini AI Question Generation).
+> **Current Phase**: `Phase 3 — AI Question Generation Engine (Completed & Verified)`  
+> Google Gemini API generates 10 tailored interview questions per configuration with competencies, expected concepts, and evaluation criteria. Responses are strictly schema-validated, stored in MongoDB Atlas, and viewable in the Question Bank UI. Ready for Phase 4 (Real-Time Voice-Based Interview Engine with Vapi).
 
 ---
 

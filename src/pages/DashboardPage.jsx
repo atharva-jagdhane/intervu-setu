@@ -181,6 +181,17 @@ export default function DashboardPage() {
                     {new Date(cfg.createdAt).toLocaleDateString()}
                   </span>
                 </div>
+                <Link
+                  to={`/interview/${cfg._id}/questions`}
+                  className="btn btn-secondary btn-sm"
+                  style={{ marginTop: '0.65rem', justifyContent: 'space-between' }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Sparkles size={14} style={{ color: 'var(--accent-primary)' }} />
+                    <span>View / Generate Questions</span>
+                  </span>
+                  <ArrowRight size={14} />
+                </Link>
               </div>
             ))}
           </div>

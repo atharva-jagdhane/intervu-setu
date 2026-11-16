@@ -352,8 +352,17 @@ export default function InterviewConfigPage() {
                 </p>
                 <div className="next-phase-notice">
                   <Info size={15} />
-                  <span>Phase 3 (AI Question Generation) will generate tailored questions for this configuration.</span>
+                  <span>Phase 3 (AI Question Generation) is ready to generate 10 tailored questions for this configuration.</span>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/interview/${feedback.savedConfig._id}/questions`)}
+                  className="btn btn-primary btn-block"
+                  style={{ marginTop: '0.85rem' }}
+                >
+                  <Sparkles size={16} />
+                  <span>View & Generate Questions</span>
+                </button>
               </div>
             )}
 

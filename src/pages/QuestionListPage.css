@@ -1,0 +1,335 @@
+/* ==========================================================================
+   Question List Page Styles (Phase 3 AI Question Generation)
+   Clean cards, tags, competency badges, evaluation checklist
+   ========================================================================== */
+
+.question-list-page {
+  padding: 2.5rem 1.5rem 6rem;
+}
+
+.breadcrumb-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 2rem;
+  font-size: 0.84375rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.back-link:hover {
+  color: var(--text-primary);
+}
+
+.breadcrumb-current {
+  color: var(--text-muted);
+}
+
+/* Header */
+.question-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.header-title {
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 800;
+  margin: 0.6rem 0 1rem;
+}
+
+.session-spec-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.spec-tag {
+  font-size: 0.78125rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.spec-tag strong {
+  color: var(--text-primary);
+}
+
+.spec-tag.diff-easy {
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}
+
+.spec-tag.diff-medium {
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+.spec-tag.diff-hard {
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+/* Generating Callout */
+.generating-callout {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem 1.75rem;
+  background: rgba(99, 102, 241, 0.08);
+  border-color: var(--accent-border);
+  margin-bottom: 2rem;
+}
+
+.callout-text h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.callout-text p {
+  font-size: 0.84375rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Empty State Card */
+.empty-questions-card {
+  padding: 4rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 640px;
+  margin: 2rem auto;
+  gap: 1rem;
+}
+
+.empty-sparkle-icon {
+  color: var(--accent-primary);
+  margin-bottom: 0.5rem;
+}
+
+.empty-questions-card p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 520px;
+  margin-bottom: 1rem;
+}
+
+/* Questions Container */
+.questions-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.notice-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+}
+
+.questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.question-item-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  padding: 1.75rem;
+}
+
+.question-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.question-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.question-number-pill {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background: var(--accent-gradient);
+  color: #ffffff;
+}
+
+.competency-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78125rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: #c7d2fe;
+}
+
+.diff-pill {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+}
+
+.diff-pill.diff-easy {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.diff-pill.diff-medium {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.diff-pill.diff-hard {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.question-text {
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.section-mini-heading {
+  display: block;
+  font-size: 0.71875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.concepts-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.concept-pill {
+  font-size: 0.78125rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.criteria-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.criteria-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.criteria-list li svg {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+/* Teaser Card */
+.voice-interview-teaser {
+  margin-top: 3.5rem;
+  padding: 2.25rem;
+  background: linear-gradient(135deg, rgba(21, 29, 48, 0.8) 0%, rgba(17, 24, 39, 0.95) 100%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.teaser-content h3 {
+  font-size: 1.35rem;
+  margin: 0.6rem 0 0.4rem;
+}
+
+.teaser-content p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  max-width: 680px;
+  line-height: 1.5;
+}
+
+/* Loading & Error Views */
+.loading-view, .error-view {
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.error-card {
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  padding: 2.5rem;
+}
+
+.icon-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

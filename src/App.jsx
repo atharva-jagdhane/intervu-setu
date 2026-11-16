@@ -7,12 +7,13 @@ import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import InterviewConfigPage from './pages/InterviewConfigPage';
+import QuestionListPage from './pages/QuestionListPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 /**
  * App Component
- * Wraps routes in AuthProvider for global authentication state.
- * Defines public routes (Landing, Register, Login) and protected student routes (Dashboard, Interview Config).
+ * Defines public routes (Landing, Register, Login) and protected student routes
+ * (Dashboard, Interview Configuration, AI Question Bank).
  */
 export default function App() {
   return (
@@ -41,6 +42,16 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <InterviewConfigPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected AI Question Bank (Phase 3) */}
+            <Route
+              path="interview/:configId/questions"
+              element={
+                <ProtectedRoute>
+                  <QuestionListPage />
                 </ProtectedRoute>
               }
             />

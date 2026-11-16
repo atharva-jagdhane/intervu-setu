@@ -71,5 +71,14 @@ export const api = {
 
   getInterviewConfigById: (id) => request(`/interview/config/${id}`, {
     method: 'GET'
+  }),
+
+  // AI Question Generation (Phase 3)
+  generateQuestions: (configId, regenerate = false) => request(`/interview/${configId}/generate${regenerate ? '?regenerate=true' : ''}`, {
+    method: 'POST'
+  }),
+
+  getQuestions: (configId) => request(`/interview/${configId}/questions`, {
+    method: 'GET'
   })
 };

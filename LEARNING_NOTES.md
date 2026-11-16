@@ -683,3 +683,133 @@ Reliable software validates data at **both layers**:
       ▼
 7. React UI renders Success Box with Config ID and adds to Dashboard history
 ```
+
+
+---
+
+# Section 5: AI Question Generation Engine with Google Gemini (Phase 3)
+
+> **Phase 3 Milestone**: Integrating Large Language Models (LLMs), Structured Output Generation, Backend Service Architecture, and Zero-Trust AI Validation.
+
+---
+
+## 1. What is an LLM (Large Language Model)?
+
+A **Large Language Model (LLM)** is a deep learning neural network based on the **Transformer Architecture** (specifically the **Self-Attention Mechanism** introduced by Google in 2017).
+
+- **Tokenization**: Text is converted into numerical tokens (words or sub-words).
+- **Probability Distribution**: At its core, an LLM predicts the next most probable token given the preceding sequence of tokens:
+  $$P(w_t \mid w_1, w_2, \dots, w_{t-1})$$
+- **Temperature Parameter**:
+  - `temperature: 0.0`: Completely deterministic, selecting the highest-probability token every time (best for math or exact code).
+  - `temperature: 0.7` (Used in IntervuSetu): Introduces creative variance so every interview session generates fresh, dynamic questions while adhering to strict constraints.
+
+---
+
+## 2. How the Google Gemini API Integration Works
+
+In IntervuSetu, we use Google's current official GenAI SDK: `@google/genai`.
+
+```javascript
+import { GoogleGenAI } from '@google/genai';
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const response = await ai.models.generateContent({
+  model: 'gemini-3.5-flash',
+  contents: prompt,
+  config: {
+    responseMimeType: 'application/json',
+    temperature: 0.7
+  }
+});
+```
+
+### Why Call Gemini from the Backend (Node.js) instead of Frontend (React)?
+1. **API Key Protection**: If called from React, your `GEMINI_API_KEY` would be visible in DevTools Network tab. Attackers could steal your key and exhaust your quota.
+2. **Rate Limiting & Caching**: The server controls request volume, enforces per-user quotas, and saves questions to MongoDB so repeated visits do not incur unnecessary Gemini API costs.
+3. **Graceful Model Fallbacks**: If a high-demand spike (HTTP 503) occurs on `gemini-3.5-flash`, our backend catches the error and automatically tries `gemini-3.1-flash-lite` or `gemini-2.5-flash-lite` transparently to the user.
+
+---
+
+## 3. Prompt Engineering for Interview Simulation
+
+**Prompt Engineering** is the practice of crafting precise, contextual instructions that guide an LLM to generate optimal outputs.
+
+In `server/services/geminiService.js`, our prompt uses three key techniques:
+1. **Role Framing (Persona)**:  
+   *"You are a Principal Engineering Lead and Technical Interviewer at a premier technology company."* Sets the professional tone and standards.
+2. **Contextual Grounding**:  
+   We inject the candidate's exact profile from their saved `InterviewConfig`:
+   - Role: `${config.role}`
+   - Domain: `${config.domain}`
+   - Experience Level: `${config.experienceLevel}`
+   - Category: `${config.category}`
+   - Difficulty: `${config.difficulty}`
+3. **Explicit Category Breakdown**:  
+   If category is **Mixed**, the prompt explicitly instructs: *"Generate 6 technical questions, 2 behavioral questions, and 2 situational/system questions."*
+
+---
+
+## 4. Structured JSON Generation & Zero-Trust AI Validation
+
+LLMs are generative text models, which means they can occasionally output markdown fences, commentary, or omitted keys.
+
+### The Zero-Trust Validation Rule:
+**Never save raw AI responses directly to your database.** Always parse, sanitize, and validate the schema.
+
+```text
+Gemini Raw Output ──► Strip Markdown (```json) ──► JSON.parse() ──► validateQuestions() ──► MongoDB Atlas
+                                                                          │
+                                                         Missing fields?  ├── Yes ──► Fallback default / Throw
+                                                                          └── No  ──► Clean Array of 10 Objects
+```
+
+### Validation Checks in `geminiService.js`:
+- Verifies that the parsed JSON is an array (or unwraps `{ questions: [...] }`).
+- Ensures `questionText` is a non-empty string with meaningful length ($> 10$ characters).
+- Enforces array types for `expectedKeyConcepts` and `evaluationCriteria`.
+- Validates difficulty level against allowed enums (`Easy`, `Medium`, `Hard`).
+- Rejects responses with fewer than 5 valid questions.
+
+---
+
+## 5. Backend Services Architectural Pattern
+
+In our project structure, we maintain clean separation of concerns:
+
+```text
+Route Handler (/routes/interviewRoutes.js)
+      │
+      ▼
+Controller (/controllers/interviewController.js)
+  - Checks HTTP request, cookies, and user authorization
+      │
+      ▼
+Service Layer (/services/geminiService.js)
+  - Talks to Google Gemini GenAI SDK
+  - Builds prompts, calls models, validates JSON schema
+      │
+      ▼
+Mongoose Model (/models/InterviewQuestion.js)
+  - Writes validated documents to MongoDB Atlas
+```
+
+**Why this matters**: If Google updates their SDK or if we switch from Gemini to an open-source model like Gemma, **only `geminiService.js` needs to change**. The controllers, routes, database schemas, and frontend stay 100% untouched.
+
+---
+
+## 6. Mongoose Data Relationships: Three-Tier Hierarchy
+
+```
+User (Student Profile)
+   │
+   └── 1:Many ──► InterviewConfig (Session Settings: Role, Level, Category)
+                     │
+                     └── 1:Many ──► InterviewQuestion (10 Generated Questions)
+```
+
+- Each `InterviewQuestion` stores both `configId` and `studentId` with a compound B-Tree index:
+  ```javascript
+  interviewQuestionSchema.index({ configId: 1, questionNumber: 1 });
+  ```
+- **Strict Authorization**: Whenever a student requests questions (`GET /api/interview/:configId/questions`), the controller verifies that `config.studentId.equals(req.user._id)`. This prevents Student A from ever reading or regenerating questions belonging to Student B.
