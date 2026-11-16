@@ -50,8 +50,10 @@ IntervuSetu is an AI-powered interview preparation and assessment platform desig
   * [x] **Backend & Database Foundation**: *Node.js + Express backend initialized, MongoDB Atlas connected, health endpoint `/api/health` active.*
   * [x] **Auth Engine & Schemas**: *User model, password hashing (bcryptjs), JWT token issuance/verification, Register, Login, and Profile APIs.*
   * [x] **Frontend Auth UI & Security**: *Student registration, login, HTTP-only cookie sessions, AuthContext, ProtectedRoute, and student dashboard.*
-- [ ] **Phase 2: Domain Taxonomy & Role Selection**  
-  *Software Engineering, Data Science, ML, Frontend, Backend role catalogs & competency tags.*
+- [x] **Phase 2: Domain Taxonomy & Role Selection**  
+  * [x] **Domain Catalog**: *5 primary domains (Software Engineering, Data Science & AI, Data Engineering, Cloud & DevOps, HR & Behavioral).*
+  * [x] **Configuration Engine**: *Mongoose relationship schema (`InterviewConfig`), ownership validation, role-domain cascading state, and multi-tier experience/category/difficulty selectors.*
+  * [x] **Configuration Studio UI**: *Responsive configuration studio page, interactive summary card, and dashboard configuration history.*
 - [ ] **Phase 3: AI Question Generation Engine**  
   *Google Gemini API backend integration with structured JSON schema outputs.*
 - [ ] **Phase 4: Real-Time Voice Interview Engine**  
@@ -67,8 +69,8 @@ IntervuSetu is an AI-powered interview preparation and assessment platform desig
 
 ## 📊 Development Status
 
-> **Current Phase**: `Phase 1 — Student Authentication (Completed & Verified)`  
-> End-to-end student authentication is fully operational. Backend endpoints (`/api/auth/register`, `/api/auth/login`, `/api/auth/me`, `/api/auth/logout`) utilize bcryptjs (12 rounds) and secure HTTP-only cookies. The React frontend provides responsive registration and login flows, global `AuthContext`, session persistence across browser refreshes, and route protection.
+> **Current Phase**: `Phase 2 — Interview Configuration System (Completed & Verified)`  
+> Students can select career domains, targeted job roles, experience levels, interview categories, and difficulties. Configurations are validated, stored in MongoDB Atlas with student ownership isolation, and listed in the authenticated student dashboard. Ready for Phase 3 (Gemini AI Question Generation).
 
 ---
 

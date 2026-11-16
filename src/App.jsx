@@ -6,12 +6,13 @@ import LandingPage from './pages/LandingPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import InterviewConfigPage from './pages/InterviewConfigPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 /**
  * App Component
  * Wraps routes in AuthProvider for global authentication state.
- * Defines public routes (Landing, Register, Login) and protected student routes (Dashboard).
+ * Defines public routes (Landing, Register, Login) and protected student routes (Dashboard, Interview Config).
  */
 export default function App() {
   return (
@@ -30,6 +31,16 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected Interview Configuration Studio (Phase 2) */}
+            <Route
+              path="interview/configure"
+              element={
+                <ProtectedRoute>
+                  <InterviewConfigPage />
                 </ProtectedRoute>
               }
             />

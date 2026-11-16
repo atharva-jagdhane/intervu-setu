@@ -53,5 +53,23 @@ export const api = {
   // Health
   checkHealth: () => request('/health', {
     method: 'GET'
+  }),
+
+  // Interview Configuration (Phase 2)
+  getTaxonomy: () => request('/interview/taxonomy', {
+    method: 'GET'
+  }),
+
+  createInterviewConfig: (configData) => request('/interview/config', {
+    method: 'POST',
+    body: JSON.stringify(configData)
+  }),
+
+  getMyInterviewConfigs: () => request('/interview/config', {
+    method: 'GET'
+  }),
+
+  getInterviewConfigById: (id) => request(`/interview/config/${id}`, {
+    method: 'GET'
   })
 };

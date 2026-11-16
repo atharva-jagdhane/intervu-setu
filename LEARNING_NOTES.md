@@ -559,3 +559,127 @@ A **Protected Route** is a higher-order wrapper component that guards private pa
 │   Backend 'protect' middleware decodes JWT and populates req.user      │
 └────────────────────────────────────────────────────────────────────────┘
 ```
+
+
+---
+
+# Section 4: Domain Taxonomy & Configuration Modeling (Phase 2)
+
+> **Phase 2 Milestone**: Multi-field State Management, Mongoose Schema References, and Ownership Authorization.
+
+---
+
+## 1. Mongoose Relationships & `ObjectId` References
+
+In relational databases (like PostgreSQL), relationships between tables are maintained using **Foreign Keys**. In MongoDB, documents reference each other using **`mongoose.Schema.Types.ObjectId`**:
+
+```javascript
+const interviewConfigSchema = new mongoose.Schema({
+  studentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // References the 'User' collection
+    required: true,
+    index: true  // Creates a B-Tree index for ultra-fast queries by student
+  },
+  domain: { type: String, required: true },
+  role: { type: String, required: true },
+  experienceLevel: { type: String, enum: ['Internship', 'Fresher / Entry-level', 'Junior Engineer'] },
+  category: { type: String, enum: ['Technical', 'HR', 'Behavioral', 'Mixed'] },
+  difficulty: { type: String, enum: ['Easy', 'Medium', 'Hard'] }
+}, { timestamps: true });
+```
+
+### Why Reference Instead of Embedding?
+- **Embedding**: Storing all configurations directly inside the `User` document array (`user.configs = [...]`). This leads to unbounded document growth (MongoDB has a 16MB document limit) and slow user profile queries.
+- **Referencing (Normalized)**: Each `InterviewConfig` is its own document with an `ObjectId` link (`studentId`). This allows students to create hundreds of practice sessions without bloating their auth profile.
+
+---
+
+## 2. CRUD Operations in Mongoose
+
+**CRUD** stands for the four foundational operations of persistent storage:
+
+| Operation | HTTP Verb | Mongoose Method | IntervuSetu Use Case |
+| :--- | :--- | :--- | :--- |
+| **Create** | `POST` | `InterviewConfig.create(payload)` | Student locks in a new interview setup |
+| **Read** | `GET` | `InterviewConfig.find({ studentId })`<br>`InterviewConfig.findById(id)` | Loading past setups on the Dashboard |
+| **Update** | `PATCH`/`PUT` | `InterviewConfig.findByIdAndUpdate(id, update)` | Updating session status (`configured` ➔ `in-progress`) |
+| **Delete** | `DELETE` | `InterviewConfig.findByIdAndDelete(id)` | Student archives or deletes a session |
+
+### Authorization & Multi-Tenancy Protection
+In production SaaS platforms, preventing users from accessing each other's data is paramount:
+```javascript
+// Strict ownership check before returning configuration
+if (!config.studentId.equals(req.user._id)) {
+  return res.status(403).json({
+    success: false,
+    message: 'Access denied: You do not have permission to view this configuration.'
+  });
+}
+```
+
+---
+
+## 3. React State Management in Complex Configuration Forms
+
+In `InterviewConfigPage.jsx`, the user configures 5 interconnected dimensions:
+1. `selectedDomain`
+2. `selectedRole`
+3. `selectedExperience`
+4. `selectedCategory`
+5. `selectedDifficulty`
+
+### Handling Dependent / Cascading State:
+When a student switches domains (e.g. from *Software Engineering* to *Data Science & AI*), the previously selected role (*Frontend Developer*) is no longer valid.
+```javascript
+const handleDomainChange = (domain) => {
+  setSelectedDomain(domain);
+  const availableRoles = domainMetadata[domain]?.roles || [];
+  // Automatically snap to the first valid role in the newly selected domain:
+  if (!availableRoles.includes(selectedRole)) {
+    setSelectedRole(availableRoles[0] || '');
+  }
+};
+```
+This guarantees that invalid domain-role combinations are prevented on the UI level before the form is ever submitted.
+
+---
+
+## 4. Multi-Layer Form Validation
+
+Reliable software validates data at **both layers**:
+1. **Frontend Validation**: Instant, friendly user feedback preventing invalid HTTP calls.
+2. **Backend Validation**: Never trust client input. The Express controller enforces taxonomy matching, enum verification, and field presence. If a malicious user uses Postman to bypass the UI, the backend returns `400 Bad Request`.
+
+---
+
+## 5. End-to-End Configuration Data Flow
+
+```text
+1. Student selects parameters in React UI
+      │
+      ▼
+2. api.createInterviewConfig(payload)
+   - Sends POST /api/interview/config with credentials: 'include'
+      │
+      ▼
+3. Express Server:
+   - CORS verifies origin
+   - cookieParser parses HTTP-only JWT cookie
+   - authMiddleware ('protect') validates JWT and attaches req.user
+      │
+      ▼
+4. interviewController.createConfig:
+   - Validates domain & role against TAXONOMY lookup
+   - Verifies experienceLevel, category, and difficulty enums
+   - Writes to MongoDB: { studentId: req.user._id, domain, role, ... }
+      │
+      ▼
+5. MongoDB Atlas writes BSON document and indexes studentId
+      │
+      ▼
+6. Server returns HTTP 201 { success: true, config }
+      │
+      ▼
+7. React UI renders Success Box with Config ID and adds to Dashboard history
+```

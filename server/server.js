@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { connectDB } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
+import interviewRoutes from './routes/interviewRoutes.js';
 
 // Load environment variables from .env
 dotenv.config();
@@ -59,6 +60,9 @@ app.get('/api/health', (req, res) => {
 
 // Authentication Routes
 app.use('/api/auth', authRoutes);
+
+// Interview Configuration Routes (Phase 2)
+app.use('/api/interview', interviewRoutes);
 
 // Global 404 Handler
 app.use((req, res) => {
