@@ -108,3 +108,28 @@
     display: none;
   }
 }
+
+.auth-btn-group, .user-nav-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.user-profile-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-full);
+  background: var(--accent-light);
+  border: 1px solid var(--accent-border);
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.user-profile-pill:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: var(--accent-primary);
+}

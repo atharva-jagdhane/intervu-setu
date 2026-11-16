@@ -1,9 +1,18 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Sparkles, Terminal, GitBranch } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Sparkles, GitBranch, LogIn, LogOut, LayoutDashboard, User } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 import './Navbar.css';
 
 export default function Navbar() {
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
+
   return (
     <header className="navbar">
       <div className="container navbar-content">
@@ -18,10 +27,12 @@ export default function Navbar() {
         </Link>
 
         <nav className="navbar-links">
-          <a href="#overview" className="nav-link">Overview</a>
-          <a href="#features" className="nav-link">Core Modules</a>
-          <a href="#tech-stack" className="nav-link">Tech Stack</a>
-          <a href="#status" className="nav-link">Phase Status</a>
+          <Link to="/" className="nav-link">Home</Link>
+          {isAuthenticated && (
+            <Link to="/dashboard" className="nav-link">Dashboard</Link>
+          )}
+          <a href="/#features" className="nav-link">Core Modules</a>
+          <a href="/#tech-stack" className="nav-link">Tech Stack</a>
         </nav>
 
         <div className="navbar-actions">
@@ -32,12 +43,31 @@ export default function Navbar() {
             className="btn btn-secondary btn-sm"
           >
             <GitBranch size={16} />
-            <span>Repository</span>
+            <span>Repo</span>
           </a>
-          <div className="status-badge">
-            <span className="status-dot"></span>
-            <span>Phase 0 Ready</span>
-          </div>
+
+          {isAuthenticated ? (
+            <div className="user-nav-group">
+              <Link to="/dashboard" className="user-profile-pill">
+                <User size={15} />
+                <span>{user?.name?.split(' ')[0] || 'Student'}</span>
+              </Link>
+              <button onClick={handleLogout} className="btn btn-secondary btn-sm" title="Sign Out">
+                <LogOut size={15} />
+                <span>Logout</span>
+              </button>
+            </div>
+          ) : (
+            <div className="auth-btn-group">
+              <Link to="/login" className="btn btn-secondary btn-sm">
+                <LogIn size={15} />
+                <span>Sign In</span>
+              </Link>
+              <Link to="/register" className="btn btn-primary btn-sm">
+                <span>Register</span>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </header>

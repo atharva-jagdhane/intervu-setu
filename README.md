@@ -46,10 +46,10 @@ IntervuSetu is an AI-powered interview preparation and assessment platform desig
 
 - [x] **Phase 0: Environment & Architecture Initialization**  
   *Vite + React initialized, clean folder structure, CSS design tokens, React Router, and landing page.*
-- [ ] **Phase 1: Student Authentication & User Profiles**  
+- [x] **Phase 1: Student Authentication & User Profiles**  
   * [x] **Backend & Database Foundation**: *Node.js + Express backend initialized, MongoDB Atlas connected, health endpoint `/api/health` active.*
-  * [ ] **Auth Engine & Schemas**: *User model, password hashing (bcryptjs), JWT token issuance/verification, Register & Login APIs.*
-  * [ ] **Frontend Auth UI**: *Student registration, login, and auth state management.*
+  * [x] **Auth Engine & Schemas**: *User model, password hashing (bcryptjs), JWT token issuance/verification, Register, Login, and Profile APIs.*
+  * [x] **Frontend Auth UI & Security**: *Student registration, login, HTTP-only cookie sessions, AuthContext, ProtectedRoute, and student dashboard.*
 - [ ] **Phase 2: Domain Taxonomy & Role Selection**  
   *Software Engineering, Data Science, ML, Frontend, Backend role catalogs & competency tags.*
 - [ ] **Phase 3: AI Question Generation Engine**  
@@ -67,8 +67,8 @@ IntervuSetu is an AI-powered interview preparation and assessment platform desig
 
 ## 📊 Development Status
 
-> **Current Phase**: `Phase 1 — Milestone 1 (Backend & MongoDB Atlas Verified)`  
-> The Express.js REST API server is configured, connected to a live MongoDB Atlas cluster, and monitored via `/api/health`. The React frontend is concurrently running with zero-leak security. Authentication endpoints and user models are the immediate next step.
+> **Current Phase**: `Phase 1 — Student Authentication (Completed & Verified)`  
+> End-to-end student authentication is fully operational. Backend endpoints (`/api/auth/register`, `/api/auth/login`, `/api/auth/me`, `/api/auth/logout`) utilize bcryptjs (12 rounds) and secure HTTP-only cookies. The React frontend provides responsive registration and login flows, global `AuthContext`, session persistence across browser refreshes, and route protection.
 
 ---
 

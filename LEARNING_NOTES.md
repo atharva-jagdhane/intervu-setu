@@ -366,3 +366,196 @@ Endpoints return structured JSON payloads with meaningful HTTP status codes:
 7. Express starts listening on port 5000
    - GET /api/health reports: { status: "healthy", database: { connected: true } }
 ```
+
+
+---
+
+# Section 3: Student Authentication & Secure Session Engineering
+
+> **Phase 1 Milestone**: End-to-End Authentication System (Mongoose, bcryptjs, JWT, HTTP-Only Cookies, React Context, and Protected Routes).
+
+---
+
+## 1. Mongoose Schemas & Schema Transforms
+
+A **Mongoose Schema** maps directly to a MongoDB collection and defines the shape of the documents within that collection.
+
+```javascript
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true, trim: true },
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  passwordHash: { type: String, required: true },
+  education: { type: String, default: 'B.Tech' },
+  targetRole: { type: String, default: 'Software Engineer' }
+}, { timestamps: true });
+```
+
+### Defense-in-Depth: The `toJSON` Transform
+Never allow passwords or hashes to leave the server. In Mongoose, we override `toJSON` on the schema:
+```javascript
+userSchema.methods.toJSON = function () {
+  const userObject = this.toObject();
+  delete userObject.passwordHash;
+  delete userObject.__v;
+  return userObject;
+};
+```
+Whenever Express serializes the document (`res.json({ user })`), Mongoose automatically strips `passwordHash` before sending it over the network.
+
+---
+
+## 2. Password Hashing & Why Plaintext is Forbidden
+
+Storing plaintext passwords is an engineering crime:
+- If an attacker breaches the database, every student's password is immediately exposed.
+- Because people reuse passwords across email, banking, and social media, a single leak compromises users everywhere.
+
+### What is a Hash Function?
+A cryptographic hash function is a **one-way mathematical operation**:
+$$\text{Input: Password} \longrightarrow \text{Hash Function} \longrightarrow \text{Output: Fixed-Length Hash}$$
+- **Deterministic**: The same password always generates the same output.
+- **One-Way**: It is computationally infeasible to reverse the hash back into the original password.
+
+### What is a Salt?
+If two users choose the password `"Password123"`, a simple MD5/SHA256 hash would produce identical hashes. Attackers use precomputed tables of millions of passwords (called **Rainbow Tables**) to crack them instantly.  
+A **Salt** is a unique, cryptographically random string generated and prepended to the password before hashing. Every user gets a different salt, ensuring identical passwords yield completely distinct hashes.
+
+---
+
+## 3. What is `bcryptjs`?
+
+**bcrypt** is an adaptive, slow hash function based on the Blowfish cipher:
+- **Work Factor / Salt Rounds**: Determines how many iterations are performed ($2^{\text{rounds}}$). In IntervuSetu, we use **12 salt rounds** ($2^{12} = 4,096$ hashing loops).
+- **Brute-Force Resistance**: If an attacker attempts billions of guesses per second with GPUs, bcrypt's computational cost slows them down to a crawl.
+- **Comparison**: `bcrypt.compare(candidatePassword, storedHash)` extracts the salt from the stored hash, hashes the candidate password, and verifies equivalence in constant time.
+
+---
+
+## 4. JWT Authentication (JSON Web Tokens)
+
+A **JSON Web Token** is a compact, URL-safe means of representing claims between two parties. It allows the server to verify who you are without querying a server-side session table on every single request (**Stateless Authentication**).
+
+```text
+  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ODkwIiwiaWF0IjoxNzg0...-rF5aZ8
+  └───────────────┬───────────────────┘ └──────────────────┬────────────────┘ └───┬───┘
+               Header                                   Payload                Signature
+         (Algorithm & Type)                    (Claims: User ID, Expiry)    (HMACSHA256)
+```
+
+1. **Header**: Specifies the hashing algorithm (`HS256`).
+2. **Payload**: Contains non-sensitive claims (e.g. `{ id: user._id, exp: 1785000000 }`).
+3. **Signature**: Cryptographic seal created using `JWT_SECRET`:
+   $$\text{Signature} = \text{HMACSHA256}(\text{base64UrlEncode(Header)} + "." + \text{base64UrlEncode(Payload)}, \text{JWT\_SECRET})$$
+
+If a hacker tampers with the payload (e.g., changes their user ID to an admin's ID), the signature verification fails because only our backend knows the `JWT_SECRET`.
+
+---
+
+## 5. HTTP-Only Cookies vs. LocalStorage
+
+A critical security decision in modern full-stack development is **where to store tokens**:
+
+| Property | `localStorage` | HTTP-Only Cookies (IntervuSetu Choice) |
+| :--- | :--- | :--- |
+| **JavaScript Access** | ✅ Accessible via `window.localStorage` | ❌ **Completely inaccessible to JavaScript** |
+| **XSS Vulnerability** | ⚠️ **Catastrophic**: Any malicious script/XSS can steal your tokens | 🛡️ **Immune**: Malicious scripts cannot read `document.cookie` |
+| **Transmission** | Must be manually attached to HTTP headers | Automatically attached by the browser on requests |
+| **CSRF Defense** | Naturally immune to CSRF | Protected by `sameSite: 'lax'` and CORS whitelist |
+
+### Our Cookie Configuration in Express:
+```javascript
+res.cookie('token', token, {
+  httpOnly: true,                               // Prevents client JavaScript from reading the cookie
+  secure: process.env.NODE_ENV === 'production',// Enforces HTTPS in production
+  sameSite: 'lax',                              // Prevents Cross-Site Request Forgery (CSRF)
+  maxAge: 7 * 24 * 60 * 60 * 1000               // 7-day expiration
+});
+```
+
+---
+
+## 6. Express Middleware Pattern (`protect`)
+
+Middleware functions have access to `(req, res, next)` and execute in a chain:
+
+```text
+Incoming Request ──► CORS Middleware ──► JSON Parser ──► Cookie Parser ──► Auth Protect ──► Controller
+                                                                               │
+                                                                 Valid JWT?   ├── No  ──► 401 Unauthorized
+                                                                               └── Yes ──► req.user = user ──► next()
+```
+
+If the token is missing, expired, or invalid, the middleware halts execution immediately.
+
+---
+
+## 7. React Context (`AuthContext`) & Custom Hook (`useAuth`)
+
+In React, passing user authentication data from component to component through props is called **Prop Drilling**, which becomes unmanageable as the component tree expands.
+
+**React Context** provides a centralized global store:
+1. **`AuthProvider`**: Holds `user`, `loading`, `login()`, `register()`, and `logout()`.
+2. **Session Persistence**: On component mount (`useEffect`), it calls `api.getMe()`. If the user has a valid HTTP-only cookie, the browser automatically sends it, and the backend returns the authenticated profile.
+3. **`useAuth` Hook**: A custom hook wrapping `useContext(AuthContext)` for one-line access in any component:
+   ```javascript
+   const { user, logout } = useAuth();
+   ```
+
+---
+
+## 8. Protected Routes in React Router DOM
+
+A **Protected Route** is a higher-order wrapper component that guards private pages (like the student dashboard or interview room):
+
+```jsx
+<Route
+  path="dashboard"
+  element={
+    <ProtectedRoute>
+      <DashboardPage />
+    </ProtectedRoute>
+  }
+/>
+```
+
+### How `ProtectedRoute` Operates:
+1. **While initializing (`loading === true`)**: Renders a loading spinner so the user isn't prematurely kicked out while `api.getMe()` is resolving.
+2. **If unauthenticated (`!user`)**: Redirects to `/login` using `<Navigate to="/login" state={{ from: location }} replace />`.  
+   *(Notice: `state={{ from: location }}` remembers what page the student was trying to visit, so after logging in, they are redirected right back to it!)*
+3. **If authenticated (`user !== null`)**: Renders `<DashboardPage />`.
+
+---
+
+## 9. Complete Authentication Data Flow
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        React Frontend (Client)                         │
+│                                                                        │
+│   Register/Login Form ──► api.login() ──► credentials: 'include'       │
+└────────────────────────────────────┬───────────────────────────────────┘
+                                     │
+                   1. POST /api/auth/login { email, password }
+                                     │
+                                     ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                       Express Backend (Server)                         │
+│                                                                        │
+│   1. Validates email & password format                                 │
+│   2. User.findOne({ email })                                           │
+│   3. bcrypt.compare(password, user.passwordHash)                       │
+│   4. jwt.sign({ id: user._id }, JWT_SECRET)                            │
+│   5. res.cookie('token', token, { httpOnly: true })                    │
+│   6. Returns HTTP 200 { success: true, user } (zero passwordHash)      │
+└────────────────────────────────────┬───────────────────────────────────┘
+                                     │
+                    2. Browser stores token in HTTP-only jar
+                                     │
+                                     ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                      Subsequent Protected Calls                        │
+│                                                                        │
+│   Browser automatically attaches 'Cookie: token=...'                   │
+│   Backend 'protect' middleware decodes JWT and populates req.user      │
+└────────────────────────────────────────────────────────────────────────┘
+```

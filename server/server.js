@@ -1,8 +1,10 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { connectDB } from './config/db.js';
+import authRoutes from './routes/authRoutes.js';
 
 // Load environment variables from .env
 dotenv.config();
@@ -14,9 +16,10 @@ const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 // Core Middlewares
 app.use(cors({
   origin: CLIENT_URL,
-  credentials: true
+  credentials: true // Crucial: Allows HTTP-only cookies to pass across origins
 }));
 app.use(express.json());
+app.use(cookieParser());
 
 // Root API Endpoint
 app.get('/', (req, res) => {
@@ -28,7 +31,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health Check Endpoint (Task 10)
+// Health Check Endpoint
 app.get('/api/health', (req, res) => {
   const dbState = mongoose.connection.readyState;
   const dbStatusMap = {
@@ -54,6 +57,17 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Authentication Routes
+app.use('/api/auth', authRoutes);
+
+// Global 404 Handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Route ${req.originalUrl} not found on IntervuSetu API`
+  });
+});
+
 // Start Server and connect to Database
 const startServer = async () => {
   console.log('🚀 Initializing IntervuSetu Backend Service...');
@@ -64,7 +78,8 @@ const startServer = async () => {
   app.listen(PORT, () => {
     console.log(`📡 [Server Listening]: http://localhost:${PORT}`);
     console.log(`🩺 [Health Check]:     http://localhost:${PORT}/api/health`);
-    console.log(`🌐 [Client URL]:       ${CLIENT_URL}\n`);
+    console.log(`🔐 [Auth Endpoints]:   http://localhost:${PORT}/api/auth`);
+    console.log(`🌐 [Client Origin]:    ${CLIENT_URL}\n`);
   });
 };
 
