@@ -12,13 +12,34 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
+
+// Allowed Origins (Supports both 5173 and 5174 dev ports, localhost & 127.0.0.1, plus env overrides)
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+  ...(process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',').map(url => url.trim()) : [])
+].filter(Boolean);
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow non-browser clients (curl, Postman, server-to-server where origin is undefined)
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS blocked for unauthorized origin: ${origin}`));
+  },
+  credentials: true, // Crucial: Allows HTTP-only cookies to pass across origins
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  exposedHeaders: ['Set-Cookie'],
+  optionsSuccessStatus: 200
+};
 
 // Core Middlewares
-app.use(cors({
-  origin: CLIENT_URL,
-  credentials: true // Crucial: Allows HTTP-only cookies to pass across origins
-}));
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Explicit OPTIONS preflight handler
 app.use(express.json());
 app.use(cookieParser());
 
@@ -83,7 +104,7 @@ const startServer = async () => {
     console.log(`📡 [Server Listening]: http://localhost:${PORT}`);
     console.log(`🩺 [Health Check]:     http://localhost:${PORT}/api/health`);
     console.log(`🔐 [Auth Endpoints]:   http://localhost:${PORT}/api/auth`);
-    console.log(`🌐 [Client Origin]:    ${CLIENT_URL}\n`);
+    console.log(`🌐 [Allowed Origins]: ${allowedOrigins.join(', ')}\n`);
   });
 };
 
