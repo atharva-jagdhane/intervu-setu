@@ -87,4 +87,13 @@ const startServer = async () => {
   });
 };
 
+// Process Safety Listeners
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('⚠️ [Server Warning] Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('⚠️ [Server Warning] Uncaught Exception:', err.message);
+});
+
 startServer();
