@@ -813,3 +813,169 @@ User (Student Profile)
   interviewQuestionSchema.index({ configId: 1, questionNumber: 1 });
   ```
 - **Strict Authorization**: Whenever a student requests questions (`GET /api/interview/:configId/questions`), the controller verifies that `config.studentId.equals(req.user._id)`. This prevents Student A from ever reading or regenerating questions belonging to Student B.
+
+
+---
+
+# Phase 4: Real-Time Voice Mock Interview Architecture & WebRTC
+
+> Engineering documentation tailored for students mastering real-time voice streaming, AI turn-taking, and stateful WebRTC workflows.
+
+---
+
+## 1. WebRTC Fundamentals (Web Real-Time Communication)
+
+**WebRTC** is a browser-native standard that enables peer-to-peer audio, video, and data communication without plugins or third-party client software.
+
+### The Core WebRTC Pipeline:
+1. **Signaling**: The discovery phase where two peers exchange network addresses (IP, ports) and media capabilities before direct connection is established. This occurs over WebSocket or HTTP.
+2. **SDP (Session Description Protocol)**: A text-based format describing multimedia communication parameters (codecs, audio sample rates, encryption keys, and bandwidth limits).
+3. **ICE (Interactive Connectivity Establishment)**: A framework that finds the fastest and most direct path to connect peers through firewalls and NAT routers.
+   - **STUN (Session Traversal Utilities for NAT)**: A lightweight server that tells the browser its external public IP address.
+   - **TURN (Traversal Using Relays around NAT)**: A relay server used as a fallback when symmetric NAT or strict enterprise firewalls prevent direct peer-to-peer transmission.
+4. **SRTP (Secure Real-Time Transport Protocol)**: Encrypted streaming audio/video packets transmitted via UDP to ensure ultra-low latency ($\approx 100\text{--}250\text{ ms}$).
+
+```
+[Student Browser] ──(Microphone Audio / SRTP)──► [Vapi WebRTC Gateway / Daily.co]
+         ▲                                                       │
+         │                                                       ▼
+         │                                            [Speech-to-Text (STT)]
+         │                                                       │
+         │                                                       ▼
+         │                                            [LLM Orchestration]
+         │                                                       │
+         │                                                       ▼
+         │                                            [Text-to-Speech (TTS)]
+         │                                                       │
+         └────────(Synthesized Voice Audio)──────────────────────┘
+```
+
+---
+
+## 2. Vapi Web SDK Architecture
+
+The **Vapi Web SDK (`@vapi-ai/web`)** abstracts complex WebRTC peer-connection negotiation, audio hardware resampling, and socket signaling into a clean event-driven interface.
+
+### Under the Hood:
+- Vapi leverages **Daily.co** WebRTC client infrastructure for high-availability call transport.
+- When calling `vapi.start(assistantId, assistantOverrides)`:
+  1. The client SDK contacts the Vapi platform with the `publicKey`.
+  2. The server spins up an ephemeral WebRTC room with Opus 48kHz audio encoding.
+  3. The browser receives the remote WebRTC transport URL and establishes an encrypted real-time audio session.
+  4. The client's microphone audio track is attached to the peer connection and streamed continuously.
+
+---
+
+## 3. Browser Microphone Permissions & Device Constraints
+
+Microphone access in modern browsers is guarded by strict Web API security policies:
+
+### How Microphone Capture Works:
+```javascript
+// Browser Native API under the hood
+const stream = await navigator.mediaDevices.getUserMedia({
+  audio: {
+    echoCancellation: true,  // Prevents acoustic feedback loops
+    noiseSuppression: true,  // Filters ambient background noise
+    autoGainControl: true    // Normalizes candidate voice volume
+  }
+});
+```
+
+### Critical Security Constraints:
+1. **Explicit User Gesture Requirement**: Browsers prohibit automatic microphone capture on page load. A user click or tap on an active element (`"Start Real-Time Interview"`) is strictly required.
+2. **HTTPS / Secure Context**: `navigator.mediaDevices` is disabled on insecure HTTP connections (except for `localhost` and `127.0.0.1` during local development).
+3. **Error Handling (`NotAllowedError`)**: When a candidate clicks "Block" or denies microphone permission, the browser rejects the promise with a `NotAllowedError`. IntervuSetu catches this event and displays an actionable banner instructing the student on how to enable microphone permissions in their browser settings.
+
+---
+
+## 4. Real-Time Event Lifecycle & State Transitions
+
+The Vapi SDK operates as an event emitter. IntervuSetu's custom `useVapi` hook converts these low-level socket and WebRTC events into reactive React state:
+
+| Event Name | Trigger | Frontend Action in IntervuSetu |
+| :--- | :--- | :--- |
+| `call-start` | WebRTC audio channel established | Transition state to `active`; start session stopwatch timer. |
+| `speech-start` | Vapi voice engine begins streaming synthesized audio | Set `isSpeaking = true`; trigger the emerald sound-wave pulse indicator. |
+| `speech-end` | Vapi voice engine completes an utterance | Set `isSpeaking = false`; return to "Listening" state. |
+| `message` | Partial or final transcript received | Process speech text; update live conversation stream; trigger question progression. |
+| `error` | Microphone blocked, socket drop, or network failure | Map error codes to human-readable guidance; set state to `error`. |
+| `call-end` | Call terminated by candidate or interviewer | Mark session as `ended`; sync final duration and transcript metadata to MongoDB. |
+
+---
+
+## 5. Live Transcript Processing & Deduplication Strategy
+
+Voice conversational engines generate two distinct types of speech messages:
+
+1. **Partial Transcripts (`transcriptType === 'partial'`)**:
+   - Sent while the speaker is mid-sentence as a stream of tokens.
+   - Displayed in IntervuSetu as a live, subtle italicized utterance bubble (`(speaking...)`) for immediate visual feedback.
+2. **Final Transcripts (`transcriptType === 'final'`)**:
+   - Dispatched when the speaker pauses or completes their thought, verified by the Automatic Speech Recognition (ASR) engine.
+   - Committed to the persistent transcript array and synced to the backend database.
+
+### The Idempotency & Deduplication Algorithm:
+Because WebRTC networks and reconnections can occasionally resend packets or re-evaluate utterances, IntervuSetu enforces dual-layer deduplication:
+```javascript
+// Server-Side Deduplication in sessionController.js:
+const existingSignatures = new Set(
+  session.transcript.map(t => `${t.speaker}|${t.text.trim()}|${t.messageId || ''}`)
+);
+
+for (const entry of entries) {
+  const signature = `${entry.speaker}|${entry.text.trim()}|${entry.messageId || ''}`;
+  if (!existingSignatures.has(signature)) {
+    session.transcript.push(entry);
+    existingSignatures.add(signature);
+  }
+}
+```
+
+---
+
+## 6. Four-Tier Database Hierarchy & Session Persistence
+
+With Phase 4, IntervuSetu expands to a four-tier relational document architecture in MongoDB Atlas:
+
+```text
+User (Student Profile)
+  │
+  └── 1:Many ──► InterviewConfig (Domain, Role, Experience, Difficulty)
+                    │
+                    ├── 1:Many ──► InterviewQuestion (10 AI-Generated Questions)
+                    │
+                    └── 1:Many ──► InterviewSession (Live Voice Calls)
+                                      ├── status: 'in_progress' | 'completed' | 'interrupted'
+                                      ├── startedAt & endedAt (Timestamps)
+                                      ├── metadata (Call duration, question count)
+                                      └── transcript: [ { speaker, text, timestamp } ]
+```
+
+### State Machine Lifecycle of an `InterviewSession`:
+```text
+[Candidate clicks 'Start Interview']
+         │
+         ▼
+[status: 'in_progress'] ──► Appending live transcript entries incrementally
+         │
+         ├── Candidate finishes all questions / ends call ──► [status: 'completed']
+         └── Network drop / Browser tab closed early       ──► [status: 'interrupted']
+```
+
+---
+
+## 7. Public vs. Private API Key Cryptography & Full-Stack Security
+
+Understanding the boundary between public and private keys is foundational to production cloud architecture:
+
+### 1. Public Key (`VITE_VAPI_PUBLIC_KEY`):
+- Embedded in the frontend client bundle.
+- **Permitted Scope**: Restricted to client-side WebRTC room join tokens and audio device binding.
+- **Safety**: Cannot be used to delete assistants, view billing details, read past call logs, or provision resources.
+
+### 2. Private Secret Keys (`GEMINI_API_KEY`, `JWT_SECRET`):
+- Kept strictly on the backend Node.js server inside `server/.env`.
+- **Never bundled into the client** or sent across public HTTP headers.
+- **Authorization Enforcement**: The client cannot request a voice interview session without presenting a valid, signed HTTP-only JWT cookie (`req.cookies.token`).
+- **Server-Side Context Generation**: The backend validates that `config.studentId.equals(req.user._id)` before synthesizing the dynamic assistant overrides, ensuring no student can eavesdrop on or hijack another student's interview session.

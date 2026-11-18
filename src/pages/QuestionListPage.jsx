@@ -10,7 +10,7 @@ import {
   Loader2,
   Tag,
   ChevronDown,
-  Layers
+  Mic
 } from 'lucide-react';
 import './QuestionListPage.css';
 
@@ -135,6 +135,15 @@ export default function QuestionListPage() {
 
         {questions.length > 0 && (
           <div className="header-actions">
+            <Link
+              to={`/interview/${configId}/live`}
+              className="btn btn-primary btn-sm"
+              style={{ marginRight: '0.5rem' }}
+            >
+              <Mic size={15} />
+              <span>Start Voice Interview</span>
+            </Link>
+
             <button
               onClick={() => handleGenerate(true)}
               disabled={generating}
@@ -142,7 +151,7 @@ export default function QuestionListPage() {
               title="Regenerate all 10 questions"
             >
               <RotateCw size={14} className={generating ? 'icon-spin' : ''} />
-              <span>{generating ? 'Regenerating...' : 'Regenerate Questions'}</span>
+              <span>{generating ? 'Regenerating...' : 'Regenerate'}</span>
             </button>
           </div>
         )}
@@ -259,18 +268,21 @@ export default function QuestionListPage() {
             ))}
           </div>
 
-          {/* Clean Next Phase Note */}
-          <div className="card upcoming-phase-card">
-            <div>
-              <span className="phase-badge">Next: Phase 4</span>
-              <h3 className="phase-title">Real-Time Voice Mock Interview</h3>
-              <p className="phase-desc">
-                In Phase 4, our voice agent will dynamically conduct this interview, evaluate spoken answers, and deliver real-time feedback.
+          {/* Voice Mock Interview Launch Card */}
+          <div className="card live-interview-card">
+            <div className="live-card-content">
+              <span className="phase-badge">Phase 4 Active</span>
+              <h3 className="live-card-title">Real-Time Voice Mock Interview</h3>
+              <p className="live-card-desc">
+                Practice answering these questions aloud in a live conversation with the IntervuSetu AI Interviewer, complete with audio stream turn-taking and real-time transcripts.
               </p>
             </div>
-            <Link to="/dashboard" className="btn btn-secondary btn-sm">
-              <span>Return to Dashboard</span>
-            </Link>
+            <div className="live-card-actions">
+              <Link to={`/interview/${configId}/live`} className="btn btn-primary">
+                <Mic size={16} />
+                <span>Start Real-Time Voice Interview</span>
+              </Link>
+            </div>
           </div>
         </div>
       )}

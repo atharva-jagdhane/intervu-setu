@@ -31,14 +31,14 @@ IntervuSetu is an AI-powered interview preparation and assessment platform desig
 | **Frontend Framework** | React.js (v19) | Reactive, component-driven user interface |
 | **Build Tool & Dev Server**| Vite (v6) | Instant HMR and optimized production bundles |
 | **Language** | JavaScript (ES6+) | Standardized modern JavaScript across client and server |
-| **Styling** | Vanilla CSS (CSS Tokens) | Custom, responsive design system with clean SaaS tokens |
-| **Routing** | React Router DOM (v7) | Client-side routing, protected routes, and navigation |
+| **Styling** | Vanilla CSS (Tokens) | Warm Ivory (`#F9EBD7`) & Emerald (`#046A38`) Minimal Editorial design |
+| **Routing** | React Router DOM (v7) | Client-side routing, protected routes, and live interview rooms |
 | **Icons** | Lucide React | Accessible, crisp UI icon system |
-| **Backend API** | Node.js & Express.js | Scalable REST API, middleware, and AI orchestration (Upcoming) |
-| **Database** | MongoDB & Mongoose | Document storage for users, sessions, and reports (Upcoming) |
-| **AI Evaluation** | Google Gemini API | Question synthesis, answer analysis, and scoring (Upcoming) |
-| **Voice Engine** | Vapi Web SDK | Real-time bidirectional voice conversation & STT (Upcoming) |
-| **Authentication** | JWT & bcryptjs | Stateless, secure authentication & password hashing (Upcoming) |
+| **Voice Engine** | Vapi Web SDK (`@vapi-ai/web`) | Real-time bidirectional WebRTC voice streaming & turn-taking |
+| **Backend API** | Node.js & Express.js | Scalable REST API, session state machines, and AI orchestration |
+| **Database** | MongoDB Atlas & Mongoose | Four-tier relational document storage (User, Config, Question, Session) |
+| **AI Question Engine** | Google Gemini API (`@google/genai`) | Context-aware structured question bank generation |
+| **Authentication** | JWT & bcryptjs | Secure HTTP-only cookie-based student authentication |
 
 ---
 
@@ -53,14 +53,18 @@ IntervuSetu is an AI-powered interview preparation and assessment platform desig
 - [x] **Phase 2: Domain Taxonomy & Role Selection**  
   * [x] **Domain Catalog**: *5 primary domains (Software Engineering, Data Science & AI, Data Engineering, Cloud & DevOps, HR & Behavioral).*
   * [x] **Configuration Engine**: *Mongoose relationship schema (`InterviewConfig`), ownership validation, role-domain cascading state, and multi-tier experience/category/difficulty selectors.*
-  * [x] **Configuration Studio UI**: *Responsive configuration studio page, interactive summary card, and dashboard configuration history.*
+  * [x] **Configuration Studio UI**: *Responsive single-page configuration studio, interactive summary card, and dashboard configuration history.*
 - [x] **Phase 3: AI Question Generation Engine**  
   * [x] **Google GenAI Backend Service**: *Official `@google/genai` integration, multi-model fallback (`gemini-3.5-flash`), zero-leak key protection.*
   * [x] **Structured Output & Schema Validation**: *10 contextual interview questions with competencies, expected key concepts, and evaluation rubrics.*
   * [x] **Mongoose Persistence & Isolation**: *`InterviewQuestion` schema with compound indexing and strict cross-student access guards.*
-  * [x] **Question Bank UI**: *Interactive question-list view with loading indicators, empty states, and regeneration actions.*
-- [ ] **Phase 4: Real-Time Voice Interview Engine**  
-  *Vapi Web SDK integration, audio streaming, turn indicators, and live transcript visualizer.*
+  * [x] **Question Bank UI**: *Interactive question-list view with editorial typography, collapsible rubrics, and regeneration actions.*
+- [x] **Phase 4: Real-Time Voice Mock Interview with Vapi**  
+  * [x] **Vapi Web SDK Integration**: *`@vapi-ai/web` service hook (`useVapi`), WebRTC audio streaming, event listeners (`call-start`, `speech-start`, `message`, `error`, `call-end`).*
+  * [x] **Dynamic Assistant Context**: *Server-side assistant context synthesis with student name, role, difficulty, and Question Bank overrides.*
+  * [x] **Voice Interview Room**: *Dedicated live room (`/interview/:configId/live`) with sound-wave speaking indicator, question progress tracker, mute toggle, and live transcript stream.*
+  * [x] **Interview Session Persistence**: *`InterviewSession` schema, state machine (`in_progress` -> `completed`/`interrupted`), deduplicated transcript storage, and call metadata.*
+  * [x] **Question Progression**: *Natural conversation progression tracking from live transcript events.*
 - [ ] **Phase 5: AI Answer Evaluation & Multi-Metric Scoring**  
   *Multi-dimensional rubrics: technical correctness, communication clarity, problem-solving depth.*
 - [ ] **Phase 6: Student Dashboard & Actionable Performance Reports**  
@@ -72,8 +76,8 @@ IntervuSetu is an AI-powered interview preparation and assessment platform desig
 
 ## 📊 Development Status
 
-> **Current Phase**: `Phase 3 — AI Question Generation Engine (Completed & Verified)`  
-> Google Gemini API generates 10 tailored interview questions per configuration with competencies, expected concepts, and evaluation criteria. Responses are strictly schema-validated, stored in MongoDB Atlas, and viewable in the Question Bank UI. Ready for Phase 4 (Real-Time Voice-Based Interview Engine with Vapi).
+> **Current Phase**: `Phase 4 — Real-Time Voice Mock Interview using Vapi (Completed & Verified)`  
+> Candidates can now conduct live, voice-to-voice mock interviews with the **IntervuSetu AI Interviewer**. The assistant speaks first, asks the 10 tailored questions in exact sequence, handles follow-ups, and streams conversational transcripts back to the browser. Sessions and transcripts are automatically persisted in MongoDB Atlas with strict cross-student ownership verification.
 
 ---
 
@@ -84,6 +88,8 @@ IntervuSetu is an AI-powered interview preparation and assessment platform desig
 - [Git](https://git-scm.com/)
 - [npm](https://www.npmjs.com/) (v10+ or v11+)
 - MongoDB Atlas cluster URI
+- Google Gemini API Key
+- Vapi Public Key & Assistant ID
 
 ### Installation & Startup Steps
 
@@ -95,6 +101,7 @@ IntervuSetu is an AI-powered interview preparation and assessment platform desig
 
 2. **Frontend Setup & Execution**:
    ```bash
+   cp .env.example .env   # Configure VITE_VAPI_PUBLIC_KEY and VITE_VAPI_ASSISTANT_ID
    npm install
    npm run dev
    ```
@@ -103,8 +110,8 @@ IntervuSetu is an AI-powered interview preparation and assessment platform desig
 3. **Backend Setup & Execution**:
    ```bash
    cd server
+   cp .env.example .env   # Configure MONGODB_URI, JWT_SECRET, and GEMINI_API_KEY
    npm install
-   cp .env.example .env   # Configure your MONGODB_URI and JWT_SECRET
    npm run dev
    ```
    *Backend starts at `http://localhost:5000/` (Health check: `http://localhost:5000/api/health`).*
@@ -113,9 +120,10 @@ IntervuSetu is an AI-powered interview preparation and assessment platform desig
 
 ## 🔒 Security & Privacy Practices
 
-- All backend credentials, database connection strings, JWT secrets, and AI API keys (Gemini, Vapi) are strictly managed via environment variables (`.env`).
-- Environment configuration files (`.env`, `.env.*`) are excluded from Git via `.gitignore`.
-- Zero private keys or backend credentials are ever exposed in client-side code.
+- All backend credentials, database connection strings, JWT secrets, and AI API keys (Gemini, Vapi private tokens) are strictly managed via server environment variables (`server/.env`).
+- Environment configuration files (`.env`, `server/.env`) are excluded from Git via `.gitignore`.
+- Only public, client-safe keys (`VITE_VAPI_PUBLIC_KEY`) are utilized on the frontend for WebRTC signaling.
+- Zero raw audio files are stored in this milestone; conversations are persisted as sanitized text transcripts with timestamp indexing.
 
 ---
 

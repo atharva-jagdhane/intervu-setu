@@ -184,7 +184,23 @@
   gap: 0.35rem;
 }
 
-.session-card-action {
+.voice-completed-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-emerald);
+  background: rgba(4, 106, 56, 0.08);
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(4, 106, 56, 0.2);
+}
+
+.session-card-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   flex-shrink: 0;
 }
 
@@ -199,11 +215,14 @@
     align-items: flex-start;
   }
 
-  .session-card-action {
+  .session-card-actions-group {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
-  .session-card-action .btn {
+  .session-card-actions-group .btn {
     width: 100%;
   }
 }

@@ -303,15 +303,21 @@
   margin-top: 0.15rem;
 }
 
-/* Next Phase Card */
-.upcoming-phase-card {
+/* Live Mock Interview Action Card */
+.live-interview-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 1.75rem;
+  padding: 1.75rem 2rem;
   margin-top: 1rem;
   gap: 1.5rem;
   background: #ffffff;
+  border-left: 3px solid var(--color-emerald);
+}
+
+.live-card-content {
+  display: flex;
+  flex-direction: column;
 }
 
 .phase-badge {
@@ -320,22 +326,26 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--color-vermilion);
+  color: var(--color-emerald);
   margin-bottom: 0.35rem;
 }
 
-.phase-title {
-  font-size: 1.05rem;
+.live-card-title {
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
 }
 
-.phase-desc {
-  font-size: 0.85rem;
+.live-card-desc {
+  font-size: 0.88rem;
   color: var(--text-secondary);
-  max-width: 520px;
-  line-height: 1.4;
+  max-width: 540px;
+  line-height: 1.5;
+}
+
+.live-card-actions {
+  flex-shrink: 0;
 }
 
 /* Loading & Error Views */
@@ -369,12 +379,16 @@
     align-items: flex-start;
   }
 
-  .upcoming-phase-card {
+  .live-interview-card {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .upcoming-phase-card .btn {
+  .live-card-actions {
+    width: 100%;
+  }
+
+  .live-card-actions .btn {
     width: 100%;
   }
 }

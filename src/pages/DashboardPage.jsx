@@ -2,31 +2,41 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
-import { Plus, ArrowRight, Clock, Sparkles } from 'lucide-react';
+import { Plus, ArrowRight, Clock, Sparkles, Mic, CheckCircle2 } from 'lucide-react';
 import './DashboardPage.css';
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const [configs, setConfigs] = useState([]);
+  const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
 
-    const fetchConfigs = async () => {
+    const fetchData = async () => {
       try {
-        const data = await api.getMyInterviewConfigs();
-        if (isMounted && data.success) {
-          setConfigs(data.configs || []);
+        const [configRes, sessionRes] = await Promise.allSettled([
+          api.getMyInterviewConfigs(),
+          api.getMyInterviewSessions()
+        ]);
+
+        if (isMounted) {
+          if (configRes.status === 'fulfilled' && configRes.value.success) {
+            setConfigs(configRes.value.configs || []);
+          }
+          if (sessionRes.status === 'fulfilled' && sessionRes.value.success) {
+            setSessions(sessionRes.value.sessions || []);
+          }
         }
       } catch (err) {
-        console.error('Error fetching interview configurations:', err.message);
+        console.error('Error fetching dashboard data:', err.message);
       } finally {
         if (isMounted) setLoading(false);
       }
     };
 
-    fetchConfigs();
+    fetchData();
 
     return () => {
       isMounted = false;
@@ -53,9 +63,9 @@ export default function DashboardPage() {
       {/* Recent Sessions Overview */}
       <section className="sessions-section">
         <div className="sessions-header">
-          <h2 className="sessions-heading">Recent Interview Sessions</h2>
+          <h2 className="sessions-heading">Recent Interview Configurations</h2>
           {configs.length > 0 && (
-            <span className="sessions-count">{configs.length} {configs.length === 1 ? 'session' : 'sessions'}</span>
+            <span className="sessions-count">{configs.length} {configs.length === 1 ? 'configuration' : 'configurations'}</span>
           )}
         </div>
 
@@ -78,43 +88,63 @@ export default function DashboardPage() {
         ) : (
           /* Compact, Airy Session Cards */
           <div className="sessions-list">
-            {configs.map((cfg) => (
-              <div key={cfg._id} className="card session-card">
-                <div className="session-card-main">
-                  <div className="session-tags">
-                    <span className="session-domain">{cfg.domain}</span>
-                    <span className={`diff-badge diff-${cfg.difficulty.toLowerCase()}`}>
-                      {cfg.difficulty}
-                    </span>
-                  </div>
-                  <h3 className="session-role">{cfg.role}</h3>
-                  <div className="session-details">
-                    <span>{cfg.experienceLevel}</span>
-                    <span className="dot-sep">•</span>
-                    <span>{cfg.category} Category</span>
-                    <span className="dot-sep">•</span>
-                    <span className="session-date">
-                      <Clock size={13} />
-                      {new Date(cfg.createdAt).toLocaleDateString(undefined, {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
-                    </span>
-                  </div>
-                </div>
+            {configs.map((cfg) => {
+              // Find completed sessions for this config
+              const completedForThis = sessions.filter(
+                (s) => s.configId?._id === cfg._id || s.configId === cfg._id
+              );
 
-                <div className="session-card-action">
-                  <Link
-                    to={`/interview/${cfg._id}/questions`}
-                    className="btn btn-secondary btn-sm"
-                  >
-                    <span>View Question Bank</span>
-                    <ArrowRight size={14} />
-                  </Link>
+              return (
+                <div key={cfg._id} className="card session-card">
+                  <div className="session-card-main">
+                    <div className="session-tags">
+                      <span className="session-domain">{cfg.domain}</span>
+                      <span className={`diff-badge diff-${cfg.difficulty.toLowerCase()}`}>
+                        {cfg.difficulty}
+                      </span>
+                      {completedForThis.length > 0 && (
+                        <span className="voice-completed-tag">
+                          <CheckCircle2 size={12} className="text-emerald" />
+                          <span>{completedForThis.length} {completedForThis.length === 1 ? 'voice session' : 'voice sessions'}</span>
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="session-role">{cfg.role}</h3>
+                    <div className="session-details">
+                      <span>{cfg.experienceLevel}</span>
+                      <span className="dot-sep">•</span>
+                      <span>{cfg.category} Category</span>
+                      <span className="dot-sep">•</span>
+                      <span className="session-date">
+                        <Clock size={13} />
+                        {new Date(cfg.createdAt).toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="session-card-actions-group">
+                    <Link
+                      to={`/interview/${cfg._id}/questions`}
+                      className="btn btn-secondary btn-sm"
+                    >
+                      <span>Questions</span>
+                      <ArrowRight size={14} />
+                    </Link>
+                    <Link
+                      to={`/interview/${cfg._id}/live`}
+                      className="btn btn-primary btn-sm"
+                    >
+                      <Mic size={14} />
+                      <span>Voice Mock</span>
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>

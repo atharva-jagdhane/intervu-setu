@@ -80,5 +80,29 @@ export const api = {
 
   getQuestions: (configId) => request(`/interview/${configId}/questions`, {
     method: 'GET'
+  }),
+
+  // Real-Time Voice Interview Sessions (Phase 4)
+  startInterviewSession: (configId) => request('/interview/session/start', {
+    method: 'POST',
+    body: JSON.stringify({ configId })
+  }),
+
+  saveSessionTranscript: (sessionId, entries) => request(`/interview/session/${sessionId}/transcript`, {
+    method: 'POST',
+    body: JSON.stringify({ entries })
+  }),
+
+  endInterviewSession: (sessionId, payload) => request(`/interview/session/${sessionId}/end`, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  }),
+
+  getInterviewSession: (sessionId) => request(`/interview/session/${sessionId}`, {
+    method: 'GET'
+  }),
+
+  getMyInterviewSessions: () => request('/interview/sessions', {
+    method: 'GET'
   })
 };

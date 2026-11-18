@@ -8,12 +8,13 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import InterviewConfigPage from './pages/InterviewConfigPage';
 import QuestionListPage from './pages/QuestionListPage';
+import VoiceInterviewPage from './pages/VoiceInterviewPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 /**
  * App Component
  * Defines public routes (Landing, Register, Login) and protected student routes
- * (Dashboard, Interview Configuration, AI Question Bank).
+ * (Dashboard, Interview Configuration, AI Question Bank, Real-Time Voice Interview).
  */
 export default function App() {
   return (
@@ -52,6 +53,16 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <QuestionListPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected Real-Time Voice Mock Interview (Phase 4) */}
+            <Route
+              path="interview/:configId/live"
+              element={
+                <ProtectedRoute>
+                  <VoiceInterviewPage />
                 </ProtectedRoute>
               }
             />
